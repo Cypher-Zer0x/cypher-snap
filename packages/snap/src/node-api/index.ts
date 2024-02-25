@@ -1,0 +1,1 @@
+export { getLastBlockIndex } from "./getlastBlockIndex";
