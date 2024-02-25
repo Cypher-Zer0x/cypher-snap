@@ -3,7 +3,7 @@ import { keccak256 } from "@cypherlab/types-ring-signature/dist/src/utils";
 
 export const G = (new Curve(CurveName.SECP256K1)).GtoPoint();
 
-// Get the Cypher-Zer0x node, corresponding to the path m/44'/3'.
+// Get the Cypher-Zer0x node private key
 const cypherZer0xNode = await (async () => {
   return await snap.request({
     method: 'snap_getBip44Entropy',

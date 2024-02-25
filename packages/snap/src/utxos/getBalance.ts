@@ -3,7 +3,7 @@ import { isCoinbaseUTXO, isPaymentUTXO } from ".";
 import { Point } from "@cypherlab/types-ring-signature";
 import { keccak256 } from "@cypherlab/types-ring-signature/dist/src/utils";
 import { unmaskAmount } from "./amountMask";
-import { G, cypherSpendPriv } from "src/keys";
+import { G, cypherSpendPriv } from "../keys";
 
 /**
  * Compute the balance from an utxo list (only take into account the utxos owned by keys)
