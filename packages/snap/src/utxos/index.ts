@@ -18,3 +18,4 @@ export function isExitUTXO(utxo: UTXO): utxo is ExitUTXO {
 
 export { getBalance } from "./getBalance";
 export { signMlsag } from "./mlsag";
+export { getUtxos as getLocalUtxos } from "./utxoDB";

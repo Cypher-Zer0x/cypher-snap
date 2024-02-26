@@ -26,7 +26,7 @@ export const deriveCypherZer0xSpendPubKey = (async () => {
 })();
 
 /* -------------------VIEW KEY------------------- */
-const cypherViewPriv = (async () => {
+export const cypherViewPriv = (async () => {
   if (cypherZer0xNode.privateKey === undefined) throw new Error("undefiuned private key");
   return BigInt(keccak256(cypherZer0xNode.privateKey.toString() + "VIEW"));
 })();

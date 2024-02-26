@@ -1,175 +1,60 @@
-import type { OnRpcRequestHandler } from '@metamask/snaps-sdk';
-import { Curve, CurveName, piSignature } from '@cypherlab/types-ring-signature';
-import { hashToSECP256K1, hexEncodeMLSAG } from './utxos/mlsag';
-import { keccak256, modulo, randomBigint } from '@cypherlab/types-ring-signature/dist/src/utils';
+import { Curve, CurveName, getRandomSecuredNumber, piSignature, randomBigint } from '@cypherlab/types-ring-signature';
+import { keccak256, modulo } from '@cypherlab/types-ring-signature/dist/src/utils';
+import { panel, text, heading } from '@metamask/snaps-ui';
+import { Mlsag } from '../interfaces';
+import { hashToSECP256K1, hexEncodeMLSAG } from '../utxos/mlsag';
 import { checkPoint } from '@cypherlab/types-ring-signature/dist/src/ringSignature';
-import { CoinbaseUTXO, Mlsag, PaymentUTXO, UnsignedPaymentTX } from './interfaces';
-import { copyable, divider, heading, panel, text } from '@metamask/snaps-sdk';
-import { getLocalUtxos } from './utxos';
-import { unmaskAmount } from './utxos/amountMask';
-import { cypherViewPriv } from './keys';
-import { G as G2 } from './keys';
 
 /**
- * Handle incoming JSON-RPC requests, sent through `wallet_invokeSnap`.
- *
- * @param args - The request handler args as object.
- * @param args.origin - The origin of the request, e.g., the website that
- * invoked the snap.
- * @param args.request - A validated JSON-RPC request object.
- * @returns The result of `snap_dialog`.
- * @throws If the request method is not valid for this snap.
+ * Sign a message using the MLSAG ring signature scheme 
+ * (MLSAG: Multilayered Linkable Spontaneous Anonymous Group signature)
+ * 
+ * @param message - The message to sign
+ * @param keys - The private keys of the UTXOs and the commitment key
+ * @param ring - The ring of public keys
  */
-export const onRpcRequest: OnRpcRequestHandler = async ({
-  origin,
-  request,
-}) => {
-  switch (request.method) {
-    case 'cypher_snap_ring_ct':
-      if (!request.params) {
-        throw new Error('Invalid request parameters');
-      }
+export async function signMlsag(message: string, privKeys: bigint[], ring: Point[][]): Promise<string> {
 
-      const requestedAmount = 100n; // BigInt(request.params.amount);
-      const receiver = G2.mult(123456789n); // Point.decompress(request.params.receiver);
-      const fee = 100n; // BigInt(request.params.fee);
+  const confirmation = await snap.request({
+    method: 'snap_dialog',
+    params: {
+      type: 'confirmation',
+      content: panel([
+        heading('MLSAG signature request'),
+        text(`You are about to sign a message with MLSAG. Please review the details and confirm.
 
-      // get the utxos from metamask storage
-      const utxos = await getLocalUtxos();
+Message: ${message}
 
-      // select utxos to match the amount requested with the currency requested (such as sum(amounts) >= requestedAmount)
-      // check if there is 1 or more utxos >= to the amount requested
-      let amounts: bigint[] = Object.keys(utxos).map((amount) => BigInt(amount));
-      let flatUtxos: (PaymentUTXO | CoinbaseUTXO)[] = amounts.map((amount) => utxos[amount.toString()]).flat().filter((utxo) => utxo !== undefined) as (PaymentUTXO | CoinbaseUTXO)[];
+Your public keys: privKeys.map((priv: bigint) => G.mult(priv).compress()).join(',\n\t')
 
-      let selectedUtxos: (PaymentUTXO | CoinbaseUTXO)[] = [];
-      let sum = 0n;
-      for (let i = 0; i < flatUtxos.length; i++) {
-        // get utxo amount
-        const clearAmount = unmaskAmount(await cypherViewPriv, Point.decompress(flatUtxos[i]!.rG), flatUtxos[i]!.amount);
+Ring: ${ring.map((elem: Point[]) => elem.map((point: Point) => point.compress()).join(',\n\t')).join(',\n\t')}
 
-        sum += clearAmount;
-        selectedUtxos.push(flatUtxos[i] as (PaymentUTXO | CoinbaseUTXO));
-        if (sum >= requestedAmount) break;
-      }
+You own ${privKeys.length} of the ${ring.flat(2).length + privKeys.length} keys in the ring.
+      `),
+      ]),
+    },
+  });
 
-      if (sum < requestedAmount) {
-        throw new Error('Insufficient funds');
-      }
-
-      // create outputs utxo
-      const maskedAmount1:   maskedAmount1 = maskAmount(bob.view.pub, r, output1), // here we are using r instead of alice.spend.priv so that bob can decrypt the amount without external elements to the utxo
-
-      const newUtxos: PaymentUTXO[] = [
-        // receiver's utxo
-        { // send 40 to receiver
-          version: "0x01",
-          transaction_hash: "transaction_hash", 
-          output_index: 0,
-          public_key: G2.compress(), // replace by request.params.receiver
-          amount: maskedAmount,
-          currency: "ETH",
-          commitment: Cout1.compress(),
-          rangeProof: getRangeProof(output1), // range proof of the amount
-          rG: G.mult(r).compress(),
-        } satisfies PaymentUTXO,satisfies PaymentUTXO,
-        // send the change back to the sender
-        {
-          rG: G2.mult(123456789n).compress(),
-          amount: sum - requestedAmount,
-          rangeProof: undefined,
-        } satisfies PaymentUTXO,
-      ];
-
-
-      // create a tx with the selected utxos
-      const unsignedTx = {
-        inputs: selectedUtxos.map((utxo: (PaymentUTXO | CoinbaseUTXO)) => keccak256(JSON.stringify(utxo))), // hash array of the input transactions
-        outputs: newUtxos.map(utxo => keccak256(JSON.stringify(utxo))),
-        fee: fee.toString(),
-      } satisfies UnsignedPaymentTX
-
-      // sign the tx
-
-      // broadcast the tx
-
-      // on success, remove the used utxos from the metamask storage
-
-      // return the txId
-
-
-
-      return txId;
-
-
-    case 'hello':
-      if (!request.params) {
-        throw new Error('Invalid request parameters');
-      }
-      const message = "request.params";
-      const ring = [ // should be generated from the UTXO set by the wallet itself
-        [
-          (new Curve(CurveName.SECP256K1)).GtoPoint().mult(12n),
-          (new Curve(CurveName.SECP256K1)).GtoPoint().mult(13n)
-        ],
-        [
-          (new Curve(CurveName.SECP256K1)).GtoPoint().mult(14n),
-          (new Curve(CurveName.SECP256K1)).GtoPoint().mult(15n)
-        ],
-        [
-          (new Curve(CurveName.SECP256K1)).GtoPoint().mult(16n),
-          (new Curve(CurveName.SECP256K1)).GtoPoint().mult(17n)
-        ]
-      ];
-
-      const privKeys = [123456888n, 99899898n];
-
-
-      const confirmation = await snap.request({
-        method: 'snap_dialog',
-        params: {
-          type: 'confirmation',
-          content: panel([
-            heading('MLSAG Request'),
-            text('You are about to sign a message with MLSAG. Please review the details and confirm.'),
-            divider(),
-            text('You are signing: '),
-            copyable(message),
-            text(`You own ${privKeys.length} of the ${ring.flat(2).length + privKeys.length} keys in the ring.`),
-            text('Ring:'),
-            copyable(ring.map((elem: Point[]) => elem.map((point: Point) => point.compress()).join(',\n\t')).join(',\n\t')),
-          ])
-        },
-      });
-
-      if ((confirmation as boolean) !== true) {
-        throw new Error('User cancelled the MLSAG signature request');
-      }
-
-      return hexEncodeMLSAG(await sign(message, privKeys, ring));
-
-
-    default:
-      throw new Error('Method not found.');
+  if ((confirmation as boolean) !== true) {
+    throw new Error('User cancelled the MLSAG signature request');
   }
-};
 
-
-
+  return hexEncodeMLSAG(await sign(message, privKeys, ring));
+}
 
 
 
 function sign(message: string, allPrivKeys: bigint[], ring: Point[][]): Mlsag {
   const curve = new Curve(CurveName.SECP256K1);
-  const G2 = curve.GtoPoint();
+  const G = curve.GtoPoint();
   const P = curve.P;
 
-  const allPubKeys: Point[] = allPrivKeys.map(privKey => G2.mult(privKey));
+  const allPubKeys: Point[] = allPrivKeys.map(privKey => G.mult(privKey));
 
   // Get the key images
   const keyImages: Point[] = allPrivKeys.map((privKey, index) => hashToSECP256K1(allPubKeys[index]!.compress()).mult(privKey));
 
-  const signerIndex = 0; // TODO: NOT SECURE
+  const signerIndex = ring.length === 0 ? 0 : getRandomSecuredNumber(0, ring.length - 1);
 
   ring = ring // TODO: insert the signer's public key at index 0 of the ring and then order the rieng elements 
     // to avoid reliying on random number generation for the signerIndex
@@ -180,11 +65,11 @@ function sign(message: string, allPrivKeys: bigint[], ring: Point[][]): Mlsag {
   // generate random responses
   let responses: bigint[][] = ring.map(ringElem => ringElem.map(() => randomBigint(P)));
 
-  const alpha = responses[0]!.map((response) => response + 1n);
+  const alpha = responses[0]!.map(() => randomBigint(P));
 
   const ceePiPlusOne = BigInt(keccak256(
     message +
-    ring[0]!.map((_, index) => G2.mult(alpha[index]!).compress()).join("") +
+    ring[0]!.map((_, index) => G.mult(alpha[index]!).compress()).join("") +
     keyImages.map((_, index) => hashToSECP256K1(allPubKeys[index]!.compress()).mult(alpha[index]!).compress()).join("")
   ));
 
@@ -205,7 +90,7 @@ function sign(message: string, allPrivKeys: bigint[], ring: Point[][]): Mlsag {
       // compute the c value
       cees[index] = BigInt(keccak256(
         message +
-        ring[0]!.map((_, index) => G2.mult(responses[indexMinusOne]![index]!).add(ring[indexMinusOne]![index]!.mult(cees[indexMinusOne]!)).compress()).join('') +
+        ring[0]!.map((_, index) => G.mult(responses[indexMinusOne]![index]!).add(ring[indexMinusOne]![index]!.mult(cees[indexMinusOne]!)).compress()).join('') +
         keyImages.map((_, index) => hashToSECP256K1(ring[indexMinusOne]![index]!.compress()).mult(responses[indexMinusOne]![index]!).add(keyImages[index]!.mult(cees[indexMinusOne]!)).compress()).join('')
       ));
     }
@@ -222,6 +107,7 @@ function sign(message: string, allPrivKeys: bigint[], ring: Point[][]): Mlsag {
   } satisfies Mlsag;
 }
 
+
 /* ----------------------------------------NOBLE-SECP256K1---------------------------------------- */
 
 // taken from https://github.com/paulmillr/noble-secp256k1/blob/097b60b10805058355f49924d6a5c5746ee116c9/index.ts
@@ -234,6 +120,8 @@ const Gy = 0x483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8n; 
 const CURVE = { p: P, n: N, a: 0n, b: 7n, Gx, Gy }; // exported variables incl. a, b
 const fLen = 32; // field / group byte length
 type Bytes = Uint8Array;
+type Hex = Bytes | string;
+type PrivKey = Hex | bigint;
 const crv = (x: bigint) => mod(mod(x * x) * x + CURVE.b); // x³ + ax + b weierstrass formula; a=0
 const err = (m = ""): never => {
   throw new Error(m);
@@ -251,6 +139,7 @@ const au8 = (
     ? err("Uint8Array expected")
     : a;
 const u8n = (data?: any) => new Uint8Array(data); // creates Uint8Array
+const toU8 = (a: Hex, len?: number) => au8(str(a) ? h2b(a) : u8n(a), len); // norm(hex/u8a) to u8a
 const mod = (a: bigint, b = P) => {
   const r = a % b;
   return r >= 0n ? r : b + r;
@@ -419,6 +308,8 @@ const h2b = (hex: string): Bytes => {
   }
   return arr;
 };
+const b2n = (b: Bytes): bigint => BigInt("0x" + (b2h(b) || "0")); // bytes to number
+const slcNum = (b: Bytes, from: number, to: number) => b2n(b.slice(from, to)); // slice bytes num
 const n2b = (num: bigint): Bytes => {
   // number to 32b. Must be 0 <= num < B256
   return big(num) && num >= 0n && num < B256
@@ -426,6 +317,16 @@ const n2b = (num: bigint): Bytes => {
     : err("bigint expected");
 };
 const n2h = (num: bigint): string => b2h(n2b(num)); // number to 32b hex
+const concatB = (...arrs: Bytes[]) => {
+  // concatenate Uint8Array-s
+  const r = u8n(arrs.reduce((sum, a) => sum + au8(a).length, 0)); // create u8a of summed length
+  let pad = 0; // walk through each array,
+  arrs.forEach((a) => {
+    r.set(a, pad);
+    pad += a.length;
+  }); // ensure they have proper type
+  return r;
+};
 const inv = (num: bigint, md = P): bigint => {
   // modular inversion
   if (num === 0n || md <= 0n) err("no inverse n=" + num + " mod=" + md); // no neg exponent for now
@@ -446,6 +347,18 @@ const inv = (num: bigint, md = P): bigint => {
   return b === 1n ? mod(x, md) : err("no inverse"); // b is gcd at this point
 };
 
+const etc = {
+  // Not placed in utils because they
+  hexToBytes: h2b,
+  bytesToHex: b2h, // share API with noble-curves.
+  concatBytes: concatB,
+  bytesToNumberBE: b2n,
+  numberToBytesBE: n2b,
+  mod,
+  invert: inv, // math utilities
+};
+
+const W = 8; // Precomputes-related code. W = window size
 
 
 /* ----------------------------------------POINT CLASS---------------------------------------- */
@@ -746,13 +659,10 @@ export class Point {
         }
       }
       default: {
-        throw new Error("Cannot decompress point: unknown curve");
+        throw  new Error("Cannot decompress point: unknown curve");
       }
     }
   }
-}
-function unknownCurve(name: never) {
-  throw new Error('Function not implemented.');
 }
 
 /**
@@ -780,30 +690,3 @@ export function modPow(
   }
   return result;
 }
-
-
-
-
-
-
-
-
-// const message = "Hello, world!";
-// const ring = [
-//   [
-//     (new Curve(CurveName.SECP256K1)).GtoPoint().mult(12n),
-//     (new Curve(CurveName.SECP256K1)).GtoPoint().mult(13n)
-//   ],
-//   [
-//     (new Curve(CurveName.SECP256K1)).GtoPoint().mult(14n),
-//     (new Curve(CurveName.SECP256K1)).GtoPoint().mult(15n)
-//   ],
-//   [
-//     (new Curve(CurveName.SECP256K1)).GtoPoint().mult(16n),
-//     (new Curve(CurveName.SECP256K1)).GtoPoint().mult(17n)
-//   ]
-// ];
-
-// const privKeys = [123456888n, 99899898n];
-
-// console.log(sign(message, privKeys, ring));

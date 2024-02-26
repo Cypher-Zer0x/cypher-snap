@@ -23,7 +23,8 @@
     "lint:fix": "yarn lint:eslint --fix && yarn lint:misc --write",
     "lint:misc": "prettier '**/*.json' '**/*.md' '!**/CHANGELOG.md' '**/*.yml' --ignore-path .gitignore",
     "start": "yarn workspaces foreach --parallel --interlaced --verbose run start",
-    "test": "yarn workspace snap run test"
+    "test": "yarn workspace snap run test",
+    "postinstall": "patch-package"
   },
   "devDependencies": {
     "@lavamoat/allow-scripts": "^3.0.0",
@@ -42,6 +43,8 @@
     "eslint-plugin-n": "^15.7.0",
     "eslint-plugin-prettier": "^4.2.1",
     "eslint-plugin-promise": "^6.1.1",
+    "patch-package": "^8.0.0",
+    "postinstall-postinstall": "^2.1.0",
     "prettier": "^2.7.1",
     "prettier-plugin-packagejson": "^2.2.18",
     "sharp": "^0.33.2",
@@ -54,12 +57,14 @@
   "lavamoat": {
     "allowScripts": {
       "@lavamoat/preinstall-always-fail": false,
-      "sharp": true
+      "sharp": true,
+      "@cypherlab/types-ring-signature>ts-node>@swc/core": false
     }
   },
   "dependencies": {
-    "@cypherlab/types-ring-signature": "/home/elli/Documents/cypher-lab/types-Ring-Signature",
+    "@cypherlab/types-ring-signature": "/home/elli/Documents/cypher-lab/rs-snap-denver",
     "@metamask/key-tree": "^9.0.0",
-    "@metamask/snaps-ui": "^3.1.0"
+    "@metamask/snaps-ui": "^3.1.0",
+    "@noble/secp256k1": "^2.0.0"
   }
 }
