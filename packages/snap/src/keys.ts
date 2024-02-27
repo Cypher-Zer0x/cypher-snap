@@ -1,7 +1,7 @@
-import { Curve, CurveName } from "@cypherlab/types-ring-signature";
-import { keccak256 } from "@cypherlab/types-ring-signature/dist/src/utils";
+import { Curve, CurveName } from "./utils";
+import { keccak256 } from "./utils";
 
-export const G = (new Curve(CurveName.SECP256K1)).GtoPoint();
+const G = (new Curve(CurveName.SECP256K1)).GtoPoint();
 
 // Get the Cypher-Zer0x node private key
 const cypherZer0xNode = await (async () => {

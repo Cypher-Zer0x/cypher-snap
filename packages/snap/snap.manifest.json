@@ -1,22 +1,24 @@
 {
   "version": "0.1.0",
-  "description": "An example Snap written in TypeScript.",
-  "proposedName": "TypeScript Example",
+  "description": "Bring privacy back with @cypher-lab",
+  "proposedName": "Cypher Zer0x",
   "repository": {
     "type": "git",
     "url": "https://github.com/MetaMask/template-snap-monorepo.git"
   },
   "source": {
-    "shasum": "3HIMyjCxDG8R3+YS58WOHgM8by2zYcQbdo3oaJvqFPU=",
+    "shasum": "oKEFfbJ3DDIfd7ExBAo2vfr1hMVevTjaU8YAFmEuG+M=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",
         "packageName": "snap",
-        "registry": "https://registry.npmjs.org/"
+        "registry": "https://registry.npmjs.org/",
+        "iconPath": "images/icon.svg"
       }
     }
   },
   "initialPermissions": {
+    "snap_manageState": {},
     "snap_dialog": {},
     "endowment:rpc": {
       "dapps": true,

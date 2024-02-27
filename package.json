@@ -65,6 +65,9 @@
     "@cypherlab/types-ring-signature": "/home/elli/Documents/cypher-lab/rs-snap-denver",
     "@metamask/key-tree": "^9.0.0",
     "@metamask/snaps-ui": "^3.1.0",
-    "@noble/secp256k1": "^2.0.0"
+    "@noble/secp256k1": "^2.0.0",
+    "bigint-crypto-utils": "^3.3.0",
+    "bulletproof-js": "^1.0.7",
+    "elliptic": "^6.5.4"
   }
 }

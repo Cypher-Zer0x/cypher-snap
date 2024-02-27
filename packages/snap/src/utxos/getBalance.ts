@@ -1,8 +1,8 @@
-import { UTXO } from "src/interfaces";
+import { UTXO } from "../interfaces";
 import { isCoinbaseUTXO, isPaymentUTXO } from ".";
-import { Point } from "@cypherlab/types-ring-signature";
-import { keccak256 } from "@cypherlab/types-ring-signature/dist/src/utils";
-import { unmaskAmount } from "./amountMask";
+import { Point } from "../utils/index";
+import { keccak256 } from "../utils";
+import { unmaskAmount } from "../utils/amountMask";
 import { G, cypherSpendPriv } from "../keys";
 
 /**
@@ -38,7 +38,7 @@ export async function getBalance(
 
       available[utxo.currency]!.utxos.push(utxo);
 
-      const clearAmount = unmaskAmount(await cypherSpendPriv, Point.decompress(utxo.rG), utxo.amount)
+      const clearAmount = unmaskAmount(await cypherSpendPriv, utxo.rG, utxo.amount)
       console.log("clear amount: ", clearAmount);
 
       available[utxo.currency]!.balance += clearAmount;

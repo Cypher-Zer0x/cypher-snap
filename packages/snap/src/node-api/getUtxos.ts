@@ -1,4 +1,4 @@
-import { UTXO } from "src/interfaces";
+import { UTXO } from "../interfaces";
 
 /**
  * get all the utxos from the network

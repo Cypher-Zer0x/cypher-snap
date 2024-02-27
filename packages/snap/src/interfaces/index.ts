@@ -1,6 +1,3 @@
-import { hash } from "@cypherlab/types-ring-signature/dist/src/utils";
-import { UTXO } from "./utxos";
-
 export * from "./proofs";
 export * from "./tx";
 export * from "./utxos";

@@ -1,2 +1,1 @@
-export * from './signMlsag';
-export * from './sign-tx';
+export { signMlsag, signRingCtTX } from './signMlsag';

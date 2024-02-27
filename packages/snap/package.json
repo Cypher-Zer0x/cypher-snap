@@ -30,7 +30,10 @@
   "dependencies": {
     "@cypherlab/types-ring-signature": "../../../../types-Ring-Signature",
     "@metamask/snaps-sdk": "^2.1.0",
-    "buffer": "^6.0.3"
+    "bigint-crypto-utils": "^3.3.0",
+    "buffer": "^6.0.3",
+    "bulletproof-js": "^1.0.7",
+    "elliptic": "^6.5.4"
   },
   "devDependencies": {
     "@jest/globals": "^29.5.0",

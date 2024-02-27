@@ -1,4 +1,4 @@
-import { CoinbaseUTXO, ExitUTXO, PaymentUTXO, UTXO } from "src/interfaces";
+import { CoinbaseUTXO, ExitUTXO, PaymentUTXO, UTXO } from "../interfaces";
 
 // Type guard for CoinbaseUTXO
 export function isCoinbaseUTXO(utxo: UTXO): utxo is CoinbaseUTXO {
@@ -16,6 +16,4 @@ export function isExitUTXO(utxo: UTXO): utxo is ExitUTXO {
 }
 
 
-export { getBalance } from "./getBalance";
-export { signMlsag } from "./mlsag";
-export { getUtxos as getLocalUtxos } from "./utxoDB";
+// export { getBalance } from "./getBalance";

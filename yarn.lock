@@ -5164,6 +5164,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/node@npm:^13.11.0":
+  version: 13.13.52
+  resolution: "@types/node@npm:13.13.52"
+  checksum: 8f1afff497ebeba209e2dc340d823284e087a47632afe99a7daa30eaff80893e520f222ad400cd1f2d3b8288e93cf3eaded52a8e64eaefb8aacfe6c35de98f42
+  languageName: node
+  linkType: hard
+
 "@types/node@npm:^8.5.7":
   version: 8.10.66
   resolution: "@types/node@npm:8.10.66"
@@ -6750,6 +6757,30 @@ __metadata:
   languageName: node
   linkType: hard
 
+"bigint-crypto-utils@npm:^2.3.1":
+  version: 2.5.6
+  resolution: "bigint-crypto-utils@npm:2.5.6"
+  dependencies:
+    "@types/node": ^13.11.0
+    bigint-mod-arith: ^2.0.4
+  checksum: 6bbe1503be6a44082d7c8d2884f553168b0ad6f8f3bcbf061b5dc1bccaf5e454af532682d3c38c03365096366bc3a1e9a65a2c78863de47aacfbe020f8a65c10
+  languageName: node
+  linkType: hard
+
+"bigint-crypto-utils@npm:^3.3.0":
+  version: 3.3.0
+  resolution: "bigint-crypto-utils@npm:3.3.0"
+  checksum: 9598ce57b23f776c8936d44114c9f051e62b5fa654915b664784cbcbacc5aa0485f4479571c51ff58008abb1210c0d6a234853742f07cf84bda890f2a1e01000
+  languageName: node
+  linkType: hard
+
+"bigint-mod-arith@npm:^2.0.4":
+  version: 2.1.0
+  resolution: "bigint-mod-arith@npm:2.1.0"
+  checksum: ce48ad6b0ddcc6119c7b0969cac0f2006f9081847ffe1e9f5ea3ab9b4587d26236c344c8364d42ba2d2487de7af183bce9df45f9d91a2f965e1410c29dfab279
+  languageName: node
+  linkType: hard
+
 "bin-links@npm:4.0.3":
   version: 4.0.3
   resolution: "bin-links@npm:4.0.3"
@@ -6805,6 +6836,13 @@ __metadata:
   version: 4.12.0
   resolution: "bn.js@npm:4.12.0"
   checksum: 39afb4f15f4ea537b55eaf1446c896af28ac948fdcf47171961475724d1bb65118cca49fa6e3d67706e4790955ec0e74de584e45c8f1ef89f46c812bee5b5a12
+  languageName: node
+  linkType: hard
+
+"bn@npm:^1.0.5":
+  version: 1.0.5
+  resolution: "bn@npm:1.0.5"
+  checksum: cbbc8c8c1b7fd459882b7927255cf509c8330548dc329be04137374af072a36a5e0a4bab27fff7eea13c0d227bfeeec42fd20f30aa3b5430c12cc02116d421a5
   languageName: node
   linkType: hard
 
@@ -7167,6 +7205,19 @@ __metadata:
   dependencies:
     semver: ^7.0.0
   checksum: 66d204657fe36522822a95b288943ad11b58f5eaede235b11d8c4edaa28ce4800087d44a2681524c340494aadb120a0068011acabe99d30e8f11a7d826d83515
+  languageName: node
+  linkType: hard
+
+"bulletproof-js@npm:^1.0.7":
+  version: 1.0.7
+  resolution: "bulletproof-js@npm:1.0.7"
+  dependencies:
+    assert: ^2.0.0
+    bigint-crypto-utils: ^2.3.1
+    bn: ^1.0.5
+    elliptic: ^6.5.1
+    js-sha256: ^0.9.0
+  checksum: 66ced8dda6fe74cdf5d612ce5d0f1031fc4b8c89b24b105cbbe77267161961edd7f6a9b84fb3015f372d2654c49d0f2c221312f9734fad80e4f6c1a2c19b1996
   languageName: node
   linkType: hard
 
@@ -8990,7 +9041,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"elliptic@npm:^6.5.3, elliptic@npm:^6.5.4":
+"elliptic@npm:^6.5.1, elliptic@npm:^6.5.3, elliptic@npm:^6.5.4":
   version: 6.5.4
   resolution: "elliptic@npm:6.5.4"
   dependencies:
@@ -13320,6 +13371,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"js-sha256@npm:^0.9.0":
+  version: 0.9.0
+  resolution: "js-sha256@npm:0.9.0"
+  checksum: ffad54b3373f81581e245866abfda50a62c483803a28176dd5c28fd2d313e0bdf830e77dac7ff8afd193c53031618920f3d98daf21cbbe80082753ab639c0365
+  languageName: node
+  linkType: hard
+
 "js-sha3@npm:^0.5.7":
   version: 0.5.7
   resolution: "js-sha3@npm:0.5.7"
@@ -17102,6 +17160,9 @@ __metadata:
     "@noble/secp256k1": ^2.0.0
     "@typescript-eslint/eslint-plugin": ^5.42.1
     "@typescript-eslint/parser": ^5.42.1
+    bigint-crypto-utils: ^3.3.0
+    bulletproof-js: ^1.0.7
+    elliptic: ^6.5.4
     eslint: ^8.45.0
     eslint-config-prettier: ^8.5.0
     eslint-plugin-import: ~2.26.0
@@ -17789,7 +17850,10 @@ __metadata:
     "@metamask/snaps-sdk": ^2.1.0
     "@typescript-eslint/eslint-plugin": ^5.42.1
     "@typescript-eslint/parser": ^5.42.1
+    bigint-crypto-utils: ^3.3.0
     buffer: ^6.0.3
+    bulletproof-js: ^1.0.7
+    elliptic: ^6.5.4
     eslint: ^8.45.0
     eslint-config-prettier: ^8.5.0
     eslint-plugin-import: ~2.26.0
