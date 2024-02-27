@@ -26,4 +26,3 @@ export function amountToString(amount: bigint, decimals: number): string {
   return `${xrp}.${xrpDecimal}`.replace(/\.?0+$/, "");
 }
 
-// export { getLocalUtxos, saveUtxos } from "./utxoDB";

@@ -28,7 +28,7 @@
     "postinstall": "patch-package"
   },
   "dependencies": {
-    "@cypherlab/types-ring-signature": "../../../../types-Ring-Signature",
+    "@cypherlab/types-ring-signature": "../../../../cypher-lab/types-Ring-Signature",
     "@metamask/snaps-sdk": "^2.1.0",
     "bigint-crypto-utils": "^3.3.0",
     "buffer": "^6.0.3",

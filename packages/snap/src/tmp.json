@@ -1,0 +1,32 @@
+{
+  "153": [
+    {
+      "version": "version",
+      "transaction_hash": "transaction_hash",
+      "output_index": 0,
+      "public_key": "02d9945f3000ad0bf2403657a68e3758153b8f33e37304a28b25c4f4574cb51ed1",
+      "amount": "101000101010111011101010100001110110000111000111000010000111010101101111111000001111100111111010101101001100111001010111010001100100110001101000101010000111010111101110110110100001111000101110001010011100111000110001000000100000010100100001010001011100010",
+      "currency": "ETH",
+      "commitment": "02394042bba4fe1c04a6742b6aacb447c9d3745d9977ea13b65e73554d7cfec3a9",
+      "rangeProof": {
+        "V": "string",
+        "A": "string",
+        "S": "string",
+        "T1": "string",
+        "T2": "string",
+        "tx": "string",
+        "txbf": "string",
+        "e": "string",
+        "a0": "string",
+        "b0": "string",
+        "ind": [
+          {
+            "L": "string",
+            "R": "string"
+          }
+        ]
+      },
+      "rG": "037c0debd4e8b7f38785888d78c958e9375ede000acb7a0f39f056f295cf963c6e"
+    }
+  ]
+}
