@@ -4,7 +4,8 @@ import { CoinbaseUTXO, PaymentUTXO } from "../../interfaces";
 import { Curve, CurveName, Point, generateRing, keccak256, unmaskAmount } from "../../utils";
 import { broadcastTx } from "../broadcastTx";
 import { getLocalUtxos, removeUtxos } from "../../utils/utxoDB";
-import { panel, text, heading, divider, copyable } from '@metamask/snaps-ui';
+import { getBalance } from "../../utxos/getBalance";
+// import { panel, text, heading, divider, copyable } from '@metamask/snaps-ui';
 
 const G = (new Curve(CurveName.SECP256K1)).GtoPoint();
 
@@ -56,27 +57,32 @@ export async function endAndBroadcastTx(data: { recipientViewPub: string, recipi
     await removeUtxos(inputs.map((utxo: (PaymentUTXO | CoinbaseUTXO)) => ({ utxo, amount: unmaskAmount(userViewPriv, utxo.rG, utxo.amount).toString() })));
   }
 
+  await getBalance([...Object.values(avant).flat()], { spendPub: G.mult(userSpendPriv).compress(), viewPriv: userViewPriv });
+
+
   const apres = await getLocalUtxos();
 
-  let confirmation = await snap.request({
-    method: 'snap_dialog',
-    params: {
-      type: 'confirmation',
-      content: panel([
-        heading('MLSAG Request'),
-        text('You are about to sign a message with MLSAG. Please review the details and confirm.'),
-        divider(),
-        text('utxos avant:'),
-        copyable(JSON.stringify(avant)),
-        divider(),
-        text('utxos apres:'),
-        copyable(JSON.stringify(apres)),
-        divider(),
-        text('inputs:'),
-        copyable(`${JSON.stringify({amount: unmaskAmount(userViewPriv, inputs[0]!.rG, inputs[0]!.amount).toString()})}`),
-      ])
-    },
-  });
+  // let confirmation = await snap.request({ // for debug purposes
+  //   method: 'snap_dialog',
+  //   params: {
+  //     type: 'confirmation',
+  //     content: panel([
+  //       heading('MLSAG Request'),
+  //       text('You are about to sign a message with MLSAG. Please review the details and confirm.'),
+  //       divider(),
+  //       text('utxos avant:'),
+  //       copyable(JSON.stringify(avant)),
+  //       divider(),
+  //       text('utxos apres:'),
+  //       copyable(JSON.stringify(apres)),
+  //       divider(),
+  //       text('inputs:'),
+  //       copyable(`${JSON.stringify({amount: unmaskAmount(userViewPriv, inputs[0]!.rG, inputs[0]!.amount).toString()})}`),
+  //     ])
+  //   },
+  // });
+
+  await getBalance([...Object.values(apres).flat()], { spendPub: G.mult(userSpendPriv).compress(), viewPriv: userViewPriv });
 
 
   // return the txId

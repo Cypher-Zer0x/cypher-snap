@@ -1,9 +1,16 @@
-import { UTXO } from "../interfaces";
+import { CoinbaseUTXO, PaymentUTXO, UTXO } from "../interfaces";
 import { isCoinbaseUTXO, isPaymentUTXO } from ".";
-import { Point } from "../utils/index";
-import { keccak256 } from "../utils";
+import { Curve, CurveName, keccak256, Point } from "../utils";
 import { unmaskAmount } from "../utils/amountMask";
-import { G, cypherSpendPriv } from "../keys";
+// import { cypherSpendPriv } from "../keys";
+import { panel, text, heading, divider, copyable } from '@metamask/snaps-ui';
+
+
+const G = (new Curve(CurveName.SECP256K1)).GtoPoint();
+
+const userViewPriv = 999999999999999999999999999999999n;
+const userSpendPriv = 8888888888888888888888888888888888n;
+
 
 /**
  * Compute the balance from an utxo list (only take into account the utxos owned by keys)
@@ -13,11 +20,11 @@ import { G, cypherSpendPriv } from "../keys";
  * @returns the balance for each currency
  */
 export async function getBalance(
-  utxos: UTXO[],
+  utxos: (CoinbaseUTXO | PaymentUTXO)[],
   keys: { spendPub: string, viewPriv: bigint }
-): Promise<{ [currency: string]: { utxos: UTXO[], balance: bigint } }> {
+): Promise<{ [currency: string]: { utxos: UTXO[], balance: string } }> {
 
-  const available: { [currency: string]: { utxos: UTXO[], balance: bigint } } = {};
+  const available: { [currency: string]: { utxos: UTXO[], balance: string } } = {};
 
   for (const utxo of utxos) {
     // switch depending on the utxo type ( PaymentUTXO | CoinbaseUTXO | ExitUTXO)
@@ -32,18 +39,31 @@ export async function getBalance(
       )) {
 
       if (available[utxo.currency] === undefined) {
-        available[utxo.currency] = { utxos: [], balance: 0n};
+        available[utxo.currency] = { utxos: [], balance: "0"};
       }
 
 
       available[utxo.currency]!.utxos.push(utxo);
 
-      const clearAmount = unmaskAmount(await cypherSpendPriv, utxo.rG, utxo.amount)
-      console.log("clear amount: ", clearAmount);
+      const clearAmount = unmaskAmount(userViewPriv, utxo.rG, utxo.amount);
 
       available[utxo.currency]!.balance += clearAmount;
     }
   }
+
+  //  let confirmation = await snap.request({ // for debug purposes
+  //   method: 'snap_dialog',
+  //   params: {
+  //     type: 'confirmation',
+  //     content: panel([
+  //       heading('MLSAG Request'),
+  //       text('You are about to sign a message with MLSAG. Please review the details and confirm.'),
+  //       divider(),
+  //       text('utxos avant:'),
+  //       copyable(JSON.stringify(available)),
+  //     ])
+  //   },
+  // });
 
   return available;
 }

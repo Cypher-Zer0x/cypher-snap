@@ -16,4 +16,4 @@ export function isExitUTXO(utxo: UTXO): utxo is ExitUTXO {
 }
 
 
-// export { getBalance } from "./getBalance";
+export { getBalance } from "./getBalance";
