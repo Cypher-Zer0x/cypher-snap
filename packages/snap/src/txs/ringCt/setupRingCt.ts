@@ -3,13 +3,10 @@ import { CoinbaseUTXO, LightRangeProof, PaymentUTXO, UnsignedPaymentTX } from ".
 import { getLocalUtxos, resetState, saveUtxos } from "../../utils/utxoDB";
 import { randomBigint } from "@cypherlab/types-ring-signature/dist/src/utils/randomNumbers";
 import { getRangeProof } from "../../utils/rangeProof";
+import { userSpendPriv, userSpendPub, userViewPub } from "../../keys";
 const G = (new Curve(CurveName.SECP256K1)).GtoPoint();
 const H = G.mult(123n); // NOT SECURE. DO NOT USE IN PRODUCTION
 
-const userViewPriv = 999999999999999999999999999999999n;
-const userSpendPriv = 8888888888888888888888888888888888n;
-const userViewPub = G.mult(userViewPriv);
-const userSpendPub = G.mult(userSpendPriv);
 
 /**
  * Setup a ringCT transaction (only payment for now, exit tx coming soon)
@@ -18,6 +15,10 @@ export async function setupRingCt(
   outputs: { recipientViewPub: string, recipientSpendPub: string, value: bigint }[],
   fee: bigint
 ): Promise<{ unsignedTx: UnsignedPaymentTX, inputs: (PaymentUTXO | CoinbaseUTXO)[], outputs: [PaymentUTXO, bigint][] }> {
+  const viewPub = Point.decompress(await userViewPub());
+  const spendPriv = await userSpendPriv();
+  const spendPub = Point.decompress(await userSpendPub());
+
   const totalAmount = outputs.reduce((acc, output) => acc + output.value, 0n);
 
   await resetState();// todo: remove for prod
@@ -29,8 +30,8 @@ export async function setupRingCt(
     version: "version",
     transaction_hash: "transaction_hash",
     output_index: 0,
-    public_key: G.mult(BigInt(keccak256(userViewPub.mult(rMock).compress()))).add(userSpendPub).compress(), // public key of the owner of the utxo
-    amount: maskAmount(userViewPub, rMock, value),
+    public_key: G.mult(BigInt(keccak256(viewPub.mult(rMock).compress()))).add(spendPub).compress(), // public key of the owner of the utxo
+    amount: maskAmount(viewPub, rMock, value),
     currency: "ETH", // currency -> TODO: find a way to encrypt it too
     commitment: G.mult(bf).add(H.mult(value)).compress(),
     rangeProof: { // todo: fix: getRangeProof(12345n), -> this range proof is useless since the amount is not linked to the commitment. This needs to be fixed
@@ -117,14 +118,14 @@ export async function setupRingCt(
   // if total sent > totalAmount + fee, create a new utxo for the change
   if (totalSent > totalAmount + fee) {
     const change = totalSent - totalAmount - fee;
-    const bf = BigInt(keccak256("commitment mask" + keccak256(userViewPub.mult(r).compress())));
+    const bf = BigInt(keccak256("commitment mask" + keccak256(viewPub.mult(r).compress())));
     const commitment = G.mult(bf).add(H.mult(change)).compress();
     outputUtxos.push({
       version: "0x00",
       transaction_hash: "transaction_hash",
       output_index: outputs.length,
-      public_key: userViewPub.compress(), // todo: find a way to generate 1 time addresses with an index so the user can have multiple change addresses (if not he will only be able to spend 1 utxo)
-      amount: maskAmount(userViewPub, userSpendPriv, change), // encrypted amount + blinding factor, only the owner can decrypt it (if coinbase, the amount is clear and there is no blinding factor)
+      public_key: viewPub.compress(), // todo: find a way to generate 1 time addresses with an index so the user can have multiple change addresses (if not he will only be able to spend 1 utxo)
+      amount: maskAmount(viewPub, spendPriv, change), // encrypted amount + blinding factor, only the owner can decrypt it (if coinbase, the amount is clear and there is no blinding factor)
       currency: "ETH", // currency -> TODO: find a way to encrypt it too
       commitment: commitment, // (compressed point) -> a cryptographic commitment to the amount, allows verification without revealing the amount
       rangeProof: { // todo: fix: getRangeProof(12345n), -> this range proof is useless since the amount is not linked to the commitment. This needs to be fixed

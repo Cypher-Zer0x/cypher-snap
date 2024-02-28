@@ -1,20 +1,12 @@
-import { CoinbaseUTXO, PaymentUTXO, UTXO, UtxoStorage } from "../interfaces";
+import { CoinbaseUTXO, PaymentUTXO, UtxoStorage } from "../interfaces";
 import { Json } from "@metamask/snaps-sdk";
-// import { Point } from ".";
-// import { keccak256 } from ".";
 import { unmaskAmount } from "./amountMask";
-import { Curve, CurveName } from ".";
-
-const G = (new Curve(CurveName.SECP256K1)).GtoPoint();
-
-const userViewPriv = 999999999999999999999999999999999n;
-const userSpendPriv = 8888888888888888888888888888888888n;
-const userViewPub = G.mult(userViewPriv);
-const userSpendPub = G.mult(userSpendPriv);
-const senderMock = { viewPriv: 1777776667777777777n, spendPriv: 2776477777777777778n };
+import { userViewPriv } from "../keys";
 
 
 export async function saveUtxos(utxos: (PaymentUTXO | CoinbaseUTXO)[]): Promise<void> {
+
+
 
   // get state
   let state: UtxoStorage = await snap.request({
@@ -27,7 +19,7 @@ export async function saveUtxos(utxos: (PaymentUTXO | CoinbaseUTXO)[]): Promise<
   // add the utxos
   for (let i = 0; i < utxos.length; i++) {
     // todo: replace by the actual signer pubkey
-    const clearAmount = unmaskAmount(userViewPriv, utxos[i]!.rG, utxos[i]!.amount).toString();
+    const clearAmount = unmaskAmount(await userViewPriv(), utxos[i]!.rG, utxos[i]!.amount).toString();
 
     // Check if `state` is initialized and if `clearAmount` key exists or is null
     if (state[clearAmount] === undefined || state[clearAmount] === null) {

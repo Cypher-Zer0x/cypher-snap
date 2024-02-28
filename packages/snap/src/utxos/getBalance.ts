@@ -1,15 +1,11 @@
 import { CoinbaseUTXO, PaymentUTXO, UTXO } from "../interfaces";
 import { isCoinbaseUTXO, isPaymentUTXO } from ".";
-import { Curve, CurveName, keccak256, Point } from "../utils";
+import { keccak256, Point } from "../utils";
 import { unmaskAmount } from "../utils/amountMask";
-// import { cypherSpendPriv } from "../keys";
-import { panel, text, heading, divider, copyable } from '@metamask/snaps-ui';
+import { G } from "../keys";
 
 
-const G = (new Curve(CurveName.SECP256K1)).GtoPoint();
 
-const userViewPriv = 999999999999999999999999999999999n;
-const userSpendPriv = 8888888888888888888888888888888888n;
 
 
 /**
@@ -45,7 +41,7 @@ export async function getBalance(
 
       available[utxo.currency]!.utxos.push(utxo);
 
-      const clearAmount = unmaskAmount(userViewPriv, utxo.rG, utxo.amount);
+      const clearAmount = unmaskAmount(keys.viewPriv, utxo.rG, utxo.amount);
 
       available[utxo.currency]!.balance += clearAmount;
     }

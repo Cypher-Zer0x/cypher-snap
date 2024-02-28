@@ -1,36 +1,37 @@
 import { Curve, CurveName } from "./utils";
 import { keccak256 } from "./utils";
 
-const G = (new Curve(CurveName.SECP256K1)).GtoPoint();
+export const G = (new Curve(CurveName.SECP256K1)).GtoPoint();
+export const H = G.mult(123n); // NOT SECURE. DO NOT USE IN PRODUCTION
 
 // Get the Cypher-Zer0x node private key
-const cypherZer0xNode = await (async () => {
+const getNode = async () => {
   return await snap.request({
     method: 'snap_getBip44Entropy',
     params: {
       coinType: 1,
     },
   });
-})();
+};
 
-// console.log(cypherZer0xNode);
 
 /* -------------------SPEND KEY------------------- */
-export const cypherSpendPriv = (async () => {
-  if (cypherZer0xNode.privateKey === undefined) throw new Error("undefiuned private key");
-  return BigInt(keccak256(cypherZer0xNode.privateKey.toString() + "SPEND"));
-})();
+export async function userSpendPriv(): Promise<bigint> {
+  if ((await getNode()).privateKey === undefined) throw new Error("undefined private key");
+  return BigInt(keccak256((await getNode()).privateKey!.toString() + "SPEND"));
+};
 
-export const deriveCypherZer0xSpendPubKey = (async () => {
-  await G.mult(await cypherSpendPriv).compress();
-})();
+
+export async function userSpendPub(): Promise<string> {
+  return await G.mult(await userSpendPriv()).compress();
+};
 
 /* -------------------VIEW KEY------------------- */
-export const cypherViewPriv = (async () => {
-  if (cypherZer0xNode.privateKey === undefined) throw new Error("undefiuned private key");
-  return BigInt(keccak256(cypherZer0xNode.privateKey.toString() + "VIEW"));
-})();
+export async function userViewPriv(): Promise<bigint> {
+  if ((await getNode()).privateKey === undefined) throw new Error("undefined private key");
+  return BigInt(keccak256((await getNode()).privateKey!.toString() + "VIEW"));
+};
 
-export const deriveCypherZer0xViewPubKey = (async () => {
-  await G.mult(await cypherViewPriv).compress();
-})();
+export async function userViewPub(): Promise<string> {
+  return await G.mult(await userViewPriv()).compress();
+};

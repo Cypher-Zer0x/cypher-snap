@@ -1,51 +1,52 @@
 import { setupRingCt } from "./setupRingCt"
 import { signRingCtTX } from "../../snap-api/signMlsag";
-import { CoinbaseUTXO, PaymentUTXO } from "../../interfaces";
-import { Curve, CurveName, Point, generateRing, keccak256, unmaskAmount } from "../../utils";
+import { CoinbaseUTXO, PaymentUTXO, SignedPaymentTX } from "../../interfaces";
+import { Point, generateRing, keccak256, unmaskAmount } from "../../utils";
 import { broadcastTx } from "../broadcastTx";
 import { getLocalUtxos, removeUtxos } from "../../utils/utxoDB";
 import { getBalance } from "../../utxos/getBalance";
-// import { panel, text, heading, divider, copyable } from '@metamask/snaps-ui';
-
-const G = (new Curve(CurveName.SECP256K1)).GtoPoint();
-
-const userViewPriv = 999999999999999999999999999999999n;
-const userSpendPriv = 8888888888888888888888888888888888n;
-
+import { G, userSpendPriv, userViewPriv  } from "../../keys";
 
 // send a tx to the client
-export async function endAndBroadcastTx(data: { recipientViewPub: string, recipientSpendPub: string, value: bigint }[], fee: bigint): Promise<string> {
+export async function endAndBroadcastTx(api: string, data: { recipientViewPub: string, recipientSpendPub: string, value: bigint }[], fee: bigint): Promise<string> {
 
   const { unsignedTx, inputs, outputs } = await setupRingCt(data, fee);
 
   const avant = await getLocalUtxos();
 
   // get the blinding factors and sum them
-  const inputsCommitmentsPrivateKey = inputs.map((utxo: (PaymentUTXO | CoinbaseUTXO)) => {
+  const viewPriv = await userViewPriv();
+  const spendPriv = await userSpendPriv();
+  const inputsCommitmentsPrivateKey = inputs.map((utxo: (PaymentUTXO | CoinbaseUTXO), index) => {
+    if (utxo.currency !== "ETH") throw new Error("currency not supported");
+
     // get the blinding factor from input utxo
-    return unmaskAmount(userViewPriv, utxo.public_key, utxo.amount);
+    return BigInt(keccak256("commitment mask" + keccak256(Point.decompress(utxo.rG).mult(viewPriv).compress()) + index.toString()));
   }).reduce((acc, curr) => acc + curr, 0n);
 
   const ring = await generateRing();
 
-  const signedTx = signRingCtTX(
-    JSON.stringify(unsignedTx),
-    {
-      utxoPrivKeys: outputs.map(utxo => BigInt(keccak256(Point.decompress(utxo[0]!.rG).mult(userViewPriv).compress())) + userSpendPriv),
-      commitmentKey: inputsCommitmentsPrivateKey - outputs.map((outputData: [PaymentUTXO, bigint]) => outputData[1]).reduce((acc, curr) => acc + curr, 0n)
-    },
-    ring,
-    {
-      utxoData: data.reduce((acc, curr) => ({ ...acc, [curr.recipientViewPub]: { currency: "ETH", value: curr.value, decimals: 18 } }), {}),
-      fee
-    }
-  );
+  const signedTx = {
+    ...unsignedTx,
+    signature: await signRingCtTX(
+      JSON.stringify(unsignedTx),
+      {
+        utxoPrivKeys: outputs.map(utxo => BigInt(keccak256(Point.decompress(utxo[0]!.rG).mult(viewPriv).compress())) + spendPriv),
+        commitmentKey: inputsCommitmentsPrivateKey - outputs.map((outputData: [PaymentUTXO, bigint]) => outputData[1]).reduce((acc, curr) => acc + curr, 0n)
+      },
+      ring,
+      {
+        utxoData: data.reduce((acc, curr) => ({ ...acc, [curr.recipientViewPub]: { currency: "ETH", value: curr.value, decimals: 18 } }), {}),
+        fee
+      }
+    )
+  } satisfies SignedPaymentTX;
 
   // broadcast the tx
   let txId = "Error";
   let broadcasted = false;
   try {
-    txId = await broadcastTx(await signedTx);
+    txId = await broadcastTx(api, signedTx, outputs.map(utxo => utxo[0]!));
     broadcasted = true;
   } catch (e) {
     console.error(e);
@@ -54,35 +55,15 @@ export async function endAndBroadcastTx(data: { recipientViewPub: string, recipi
 
   if (broadcasted) {
     // remove the utxos from the local storage
-    await removeUtxos(inputs.map((utxo: (PaymentUTXO | CoinbaseUTXO)) => ({ utxo, amount: unmaskAmount(userViewPriv, utxo.rG, utxo.amount).toString() })));
+    await removeUtxos(inputs.map((utxo: (PaymentUTXO | CoinbaseUTXO)) => ({ utxo, amount: unmaskAmount(viewPriv, utxo.rG, utxo.amount).toString() })));
   }
 
-  await getBalance([...Object.values(avant).flat()], { spendPub: G.mult(userSpendPriv).compress(), viewPriv: userViewPriv });
+  await getBalance([...Object.values(avant).flat()], { spendPub: G.mult(spendPriv).compress(), viewPriv: viewPriv });
 
 
   const apres = await getLocalUtxos();
 
-  // let confirmation = await snap.request({ // for debug purposes
-  //   method: 'snap_dialog',
-  //   params: {
-  //     type: 'confirmation',
-  //     content: panel([
-  //       heading('MLSAG Request'),
-  //       text('You are about to sign a message with MLSAG. Please review the details and confirm.'),
-  //       divider(),
-  //       text('utxos avant:'),
-  //       copyable(JSON.stringify(avant)),
-  //       divider(),
-  //       text('utxos apres:'),
-  //       copyable(JSON.stringify(apres)),
-  //       divider(),
-  //       text('inputs:'),
-  //       copyable(`${JSON.stringify({amount: unmaskAmount(userViewPriv, inputs[0]!.rG, inputs[0]!.amount).toString()})}`),
-  //     ])
-  //   },
-  // });
-
-  await getBalance([...Object.values(apres).flat()], { spendPub: G.mult(userSpendPriv).compress(), viewPriv: userViewPriv });
+  await getBalance([...Object.values(apres).flat()], { spendPub: G.mult(spendPriv).compress(), viewPriv: viewPriv });
 
 
   // return the txId

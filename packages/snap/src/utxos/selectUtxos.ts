@@ -1,4 +1,4 @@
-import { CoinbaseUTXO, PaymentUTXO, UTXO } from "../interfaces";
+import { CoinbaseUTXO, PaymentUTXO } from "../interfaces";
 import { isCoinbaseUTXO, isPaymentUTXO } from ".";
 import { Point, keccak256, Curve, CurveName } from "../utils";
 
