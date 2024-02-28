@@ -88,6 +88,7 @@ export async function setupRingCt(
 
     blindingFactors.push(bf);
     totalSent += output.value;
+    console.log("recipientViewPub: \n", recipientViewPub.compress());
 
     return {
       version: "0x00",

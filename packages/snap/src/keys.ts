@@ -43,7 +43,7 @@ export const userAddress = async () => {
 };
 
 const addrPrefix = "cz:";
-const addrLength = addrPrefix.length + 2 * 33; // 33 bytes for each pub key (1 parity byte + 32 bytes for the coordinate)
+const addrLength = addrPrefix.length + 2 * 66; // 33 bytes for each pub key (1 parity byte + 32 bytes for the coordinate)
 
 export const addressFromPubKeys = async (spendPub: string, viewPub: string) => {
   return  addrPrefix + spendPub + viewPub;
@@ -52,8 +52,8 @@ export const addressFromPubKeys = async (spendPub: string, viewPub: string) => {
 export const pubKeysFromAddress = async (address: string) => {
   if (!isAddressValid(address)) throw new Error("Invalid address");
   return {
-    spendPub: address.slice(addrPrefix.length, addrLength),
-    viewPub: address.slice(addrLength),
+    spendPub: address.slice(addrPrefix.length, addrLength - addrPrefix.length - 66 + 3),
+    viewPub: address.slice(addrPrefix.length + addrLength - addrPrefix.length - 66),
   };
 }
 

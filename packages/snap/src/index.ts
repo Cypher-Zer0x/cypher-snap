@@ -24,7 +24,7 @@ const api = "https://api.zer0x.xyz";
 import type { OnHomePageHandler, OnRpcRequestHandler } from '@metamask/snaps-sdk';
 import { getBalance } from "./utxos";
 import { CoinbaseUTXO, PaymentUTXO } from "./interfaces";
-import { addressFromPubKeys } from "./keys";
+import { addressFromPubKeys, pubKeysFromAddress } from "./keys";
 
 export const onHomePage: OnHomePageHandler = async () => {
   /* 
@@ -91,12 +91,13 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
 
       const data = [
         {
-          address: await addressFromPubKeys(G.mult(11n).compress(), G.mult(12n).compress()),
+          address: await addressFromPubKeys(G.mult(12n).compress(), G.mult(11n).compress()),
           value: 100n
         }
       ];
 
       const fee = 10n;
+      
       return await endAndBroadcastTx(api, data, fee)
     // return JSON.stringify(await getUtxos(api));
 
