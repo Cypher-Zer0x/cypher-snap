@@ -70,7 +70,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
   request,
 }) => {
   switch (request.method) {
-    case 'hello': // cypher_snap_mlsag_request
+    case 'hello1': // cypher_snap_mlsag_request
 
       const utxos = await getUtxos("https://api.zer0x.xyz");
       const balance = getBalance(utxos as (PaymentUTXO | CoinbaseUTXO)[], { spendPub: G.mult(11111111n).compress(), viewPriv: 12344555n });
@@ -87,7 +87,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
         },
       });
 
-    case 'hello1':
+    case 'hello':
 
       const data = [
         {
