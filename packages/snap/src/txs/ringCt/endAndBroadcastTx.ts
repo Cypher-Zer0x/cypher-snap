@@ -5,10 +5,10 @@ import { Point, generateRing, keccak256, unmaskAmount } from "../../utils";
 import { broadcastTx } from "../broadcastTx";
 import { getLocalUtxos, removeUtxos } from "../../utils/utxoDB";
 import { getBalance } from "../../utxos/getBalance";
-import { G, userSpendPriv, userViewPriv } from "../../keys";
+import { G, pubKeysFromAddress, userSpendPriv, userViewPriv } from "../../keys";
 
 // send a tx to the client
-export async function endAndBroadcastTx(api: string, data: { recipientViewPub: string, recipientSpendPub: string, value: bigint }[], fee: bigint): Promise<string> {
+export async function endAndBroadcastTx(api: string, data: { address: string, value: bigint }[], fee: bigint): Promise<string> {
 
   const { unsignedTx, inputs, outputs } = await setupRingCt(data, fee);
 
@@ -36,7 +36,7 @@ export async function endAndBroadcastTx(api: string, data: { recipientViewPub: s
       },
       ring,
       {
-        utxoData: data.reduce((acc, curr) => ({ ...acc, [curr.recipientViewPub]: { currency: "ETH", value: curr.value, decimals: 18 } }), {}),
+        utxoData: data.reduce(async (acc, curr,) => ({ ...acc, [(await pubKeysFromAddress(curr.address)).viewPub]: { currency: "ETH", value: curr.value, decimals: 18 } }), {}),
         fee
       }
     )
