@@ -3,9 +3,7 @@ import { isCoinbaseUTXO, isPaymentUTXO } from ".";
 import { keccak256, Point } from "../utils";
 import { unmaskAmount } from "../utils/amountMask";
 import { G } from "../keys";
-
-
-
+import { getUtxos } from "../node-api/getUtxos";
 
 
 /**
@@ -63,3 +61,5 @@ export async function getBalance(
 
   return available;
 }
+
+

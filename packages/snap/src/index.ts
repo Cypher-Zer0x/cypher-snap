@@ -22,6 +22,8 @@ const G = (new Curve(CurveName.SECP256K1)).GtoPoint();
 const api = "https://api.zer0x.xyz";
 
 import type { OnHomePageHandler, OnRpcRequestHandler } from '@metamask/snaps-sdk';
+import { getBalance } from "./utxos";
+import { CoinbaseUTXO, PaymentUTXO } from "./interfaces";
 
 export const onHomePage: OnHomePageHandler = async () => {
   /* 
@@ -67,43 +69,24 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
   request,
 }) => {
   switch (request.method) {
-    case 'hello1': // cypher_snap_mlsag_request
-      // if (!request.params) {
-      //   throw new Error('Invalid request parameters');
-      // }
-      const message = "request.params";
-      const ring = [ // should be generated from the UTXO set by the wallet itself
-        [
-          (new Curve(CurveName.SECP256K1)).GtoPoint().mult(12n),
-          (new Curve(CurveName.SECP256K1)).GtoPoint().mult(13n)
-        ],
-        [
-          (new Curve(CurveName.SECP256K1)).GtoPoint().mult(14n),
-          (new Curve(CurveName.SECP256K1)).GtoPoint().mult(15n)
-        ],
-        [
-          (new Curve(CurveName.SECP256K1)).GtoPoint().mult(16n),
-          (new Curve(CurveName.SECP256K1)).GtoPoint().mult(17n)
-        ]
-      ];
+    case 'hello': // cypher_snap_mlsag_request
 
-      const privKeys = [123456888n, 99899898n];
+      const utxos = await getUtxos("https://api.zer0x.xyz");
+      const balance = getBalance(utxos as (PaymentUTXO | CoinbaseUTXO)[], { spendPub: G.mult(11111111n).compress(), viewPriv: 12344555n });
 
-      const recipientViewPriv = 177777777777777777n; // todo: remove for prod
-      const recipientSpendPriv = 277777777777777778n; // todo: remove for prod
+      return await snap.request({
+        method: 'snap_dialog',
+        params: {
+          type: 'confirmation',
+          content: panel([
+            heading('MLSAG Request'),
+            text('You are about to sign a message with MLSAG. Please review the details and confirm.'),
+            copyable(JSON.stringify(balance)),
+          ])
+        },
+      });
 
-
-      const outputs = [
-        {
-          recipientViewPub: G.mult(recipientViewPriv).compress(), // todo: get from request args
-          recipientSpendPub: G.mult(recipientSpendPriv).compress(), // todo: get from request args
-          value: 10n
-        }
-      ];
-
-      return await signMlsag(message, privKeys, ring);
-
-    case 'hello':
+    case 'hello1':
 
       const data = [
         {
