@@ -3,9 +3,7 @@ import { CoinbaseUTXO, LightRangeProof, PaymentUTXO, UnsignedPaymentTX } from ".
 import { getLocalUtxos, resetState, saveUtxos } from "../../utils/utxoDB";
 import { randomBigint } from "@cypherlab/types-ring-signature/dist/src/utils/randomNumbers";
 import { getRangeProof } from "../../utils/rangeProof";
-import { userSpendPriv, userSpendPub, userViewPub } from "../../keys";
-const G = (new Curve(CurveName.SECP256K1)).GtoPoint();
-const H = G.mult(123n); // NOT SECURE. DO NOT USE IN PRODUCTION
+import { userSpendPub, userViewPub, G, H } from "../../keys";
 
 
 /**
@@ -16,7 +14,6 @@ export async function setupRingCt(
   fee: bigint
 ): Promise<{ unsignedTx: UnsignedPaymentTX, inputs: (PaymentUTXO | CoinbaseUTXO)[], outputs: [PaymentUTXO, bigint][] }> {
   const viewPub = Point.decompress(await userViewPub());
-  const spendPriv = await userSpendPriv();
   const spendPub = Point.decompress(await userSpendPub());
 
   const totalAmount = outputs.reduce((acc, output) => acc + output.value, 0n);
@@ -94,7 +91,7 @@ export async function setupRingCt(
       transaction_hash: "transaction_hash",
       output_index: index,
       public_key: receiverPubKey, // public key of the owner of the utxo
-      amount: maskAmount(G.mult(BigInt("0xa77a293237ea6d1539f1608665fe0b7135115e4acc6ffeafa56e676dac88ce6d")), 123n, output.value), // encrypted amount + blinding factor, only the owner can decrypt it (if coinbase, the amount is clear and there is no blinding factor)
+      amount: maskAmount(Point.decompress(outputs[index]!.recipientViewPub), r, output.value), // encrypted amount + blinding factor, only the owner can decrypt it (if coinbase, the amount is clear and there is no blinding factor)
       currency: "ETH", // currency -> TODO: find a way to encrypt it too
       commitment: commitment, // (compressed point) -> a cryptographic commitment to the amount, allows verification without revealing the amount
       rangeProof: { // todo: fix: getRangeProof(12345n), -> this range proof is useless since the amount is not linked to the commitment. This needs to be fixed
@@ -114,10 +111,13 @@ export async function setupRingCt(
     } satisfies PaymentUTXO;
 
   });
-
+  console.log("total sent:", sum, "needed: ", totalAmount + fee, "expected change: ", sum - totalAmount - fee);
   // if total sent > totalAmount + fee, create a new utxo for the change
-  if (totalSent > totalAmount + fee) {
-    const change = totalSent - totalAmount - fee;
+  if (sum > totalAmount + fee) {
+    const r = randomBigint((new Curve(CurveName.SECP256K1)).N);
+    // console.log("totalSent > totalAmount + fee: ", sum > totalAmount + fee);
+    const change = sum - totalAmount - fee;
+    if(change < 0) throw new Error("change < 0");
     const bf = BigInt(keccak256("commitment mask" + keccak256(viewPub.mult(r).compress())));
     const commitment = G.mult(bf).add(H.mult(change)).compress();
     outputUtxos.push({
@@ -125,7 +125,7 @@ export async function setupRingCt(
       transaction_hash: "transaction_hash",
       output_index: outputs.length,
       public_key: viewPub.compress(), // todo: find a way to generate 1 time addresses with an index so the user can have multiple change addresses (if not he will only be able to spend 1 utxo)
-      amount: maskAmount(viewPub, spendPriv, change), // encrypted amount + blinding factor, only the owner can decrypt it (if coinbase, the amount is clear and there is no blinding factor)
+      amount: maskAmount(viewPub, r, change), // encrypted amount + blinding factor, only the owner can decrypt it (if coinbase, the amount is clear and there is no blinding factor)
       currency: "ETH", // currency -> TODO: find a way to encrypt it too
       commitment: commitment, // (compressed point) -> a cryptographic commitment to the amount, allows verification without revealing the amount
       rangeProof: { // todo: fix: getRangeProof(12345n), -> this range proof is useless since the amount is not linked to the commitment. This needs to be fixed
@@ -143,6 +143,8 @@ export async function setupRingCt(
           } satisfies LightRangeProof, // getRangeProof(change),
       rG: G.mult(r).compress(), // rG = G*r
     } satisfies PaymentUTXO);
+
+    blindingFactors.push(bf);
   }
 
   // generate the tx
@@ -152,6 +154,7 @@ export async function setupRingCt(
     fee: '0x' + fee.toString(16),
   } satisfies UnsignedPaymentTX;
 
+  // todo: mix outputs order to avoid always having the change output at the end of the tx
 
   // return the tx
   return { unsignedTx: tx, inputs: selectedUtxos, outputs: outputUtxos.map((utxo, index) => ([utxo, blindingFactors[index]!])) };

@@ -8,9 +8,9 @@ import { UTXO } from "../interfaces";
  */
 export async function getUtxos(api: string): Promise<UTXO[]> {
 
-  const utxoSet = await fetch(`${api}/getUtxoSet`).then((res) => res.json());
+  const utxoSet = await fetch(`${api}/utxo/set`).then((res) => res.json());
 
   return utxoSet.map((utxo: UTXO) => utxo);
 }
 
-// getUtxos("http://176.146.201.74:3000").then(console.log);
+// getUtxos("http://176.146.201.74:8000").then(console.log);

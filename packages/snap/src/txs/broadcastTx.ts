@@ -10,33 +10,22 @@ import { SignedPaymentTX, TxToRpc, UTXO } from "../interfaces";
  */
 export async function broadcastTx(api: string, signedTx: SignedPaymentTX, outputs: UTXO[]): Promise<string> {
 
-  //  pub fn new(inputs: Vec<String>, outputs: Vec<UTXO>, signature: String) -> PendingRingCT {
-  //   let inputs_bytes = bincode::serialize(&inputs).unwrap();
-  //   let outputs_bytes = bincode::serialize(&outputs).unwrap();
-  //   let bytes = [inputs_bytes, outputs_bytes].concat();
-  //   PendingRingCT {
-  //       inputs,
-  //       outputs,
-  //       hash: hex::encode(keccak256(&bytes)).to_string(),
-  //       signature,
-  //   }
-  // convert the inputs and outputs to bytes, concatenate them and hash the result
+
+  // convert the inputs, outputs, fee and sig to bytes, concatenate them and hash the result
   const hash = keccak256([
     ...Buffer.from(JSON.stringify(signedTx.inputs)),
-    ...Buffer.from(JSON.stringify(outputs)),
-    ...Buffer.from(signedTx.fee)
+    ...Buffer.from(JSON.stringify(signedTx.outputs)),
+    ...Buffer.from(signedTx.fee),
+    ...Buffer.from(signedTx.signature)
   ].map((byte) => BigInt(byte)));
 
 
   const txToBroadcast = {
-    inputs: signedTx.inputs, // inputs of the transaction from the UTXO set
-    outputs: outputs, // UTXOs to be created
-    hash: hash,      // 
-    signature: signedTx.signature, // tx mlsag signature
+    hash: hash,
+    signature: signedTx.signature, // tx mlsag hex signature
+    outputList: outputs // UTXOs to be created
   } satisfies TxToRpc;
 
-  console.log("api: ", api, 'full: ' + `${api}/ringct`);
-  console.log("txToBroadcast: `n", JSON.stringify(txToBroadcast));
 
   // send the tx to the network
   const body = JSON.stringify(txToBroadcast);

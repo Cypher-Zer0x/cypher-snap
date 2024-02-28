@@ -3,6 +3,7 @@ import { keccak256 } from '../utils';
 import { panel, text, heading, divider, copyable } from '@metamask/snaps-ui';
 import { Mlsag } from '../interfaces';
 import { amountToString, Point, Curve, CurveName } from '../utils';
+import { G } from '../keys';
 
 /**
  * Sign a message using the MLSAG ring signature scheme 
@@ -84,17 +85,11 @@ export async function signRingCtTX(
   ring: Point[][],
   txContent: { utxoData: { [recipient: string]: { currency: string, value: bigint, decimals: number } }, fee: bigint }
 ): Promise<string> {
-  const G2 = new Curve(CurveName.SECP256K1).GtoPoint();
 
-  const txDetails =
-    Object.entries(txContent.utxoData).map(
-      ([recipient, { currency, value, decimals }]) => `Recipient: ${recipient} -> ${amountToString(value, decimals)} ${currency}`)
-      .join('\n');
   const recipientList =
     Object.entries(txContent.utxoData).map(
       ([recipient, { currency, value, decimals }]) => copyable(`Recipient: ${recipient} -> ${amountToString(value, decimals)} ${currency}`)
     );
-
 
   let confirmation = await snap.request({
     method: 'snap_dialog',
@@ -120,7 +115,7 @@ export async function signRingCtTX(
     throw new Error('User cancelled the MLSAG signature request');
   }
 
-  const commitmentPubKey = G2.mult(keys.commitmentKey);
+  const commitmentPubKey = G.mult(keys.commitmentKey);
   // add the commitment key to each ring element
   ring = ring.map(ringElem => [commitmentPubKey, ...ringElem]) as Point[][];
 

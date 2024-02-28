@@ -19,8 +19,7 @@ export interface UnsignedPaymentTX {
 
 // body expected by the ringct endpoint
 export interface TxToRpc {
-  inputs: string[], //
-  outputs: UTXO[], // UTXOs to be created
-  hash: string,      // hash of the UTXO
-  signature: string, // signature of the transaction in hex format
+  hash: string, // hash of the transaction: keccak(bytes(json(inputs)) + bytes(json(outputs)) + bytes(fee) + bytes(hex(signature)))
+  outputList: UTXO[], // UTXOs to be created
+  signature: string, // signature of the transaction in hex format -> to get tx data, parse the signature message
 }

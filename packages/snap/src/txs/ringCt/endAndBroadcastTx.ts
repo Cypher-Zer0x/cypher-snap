@@ -5,7 +5,7 @@ import { Point, generateRing, keccak256, unmaskAmount } from "../../utils";
 import { broadcastTx } from "../broadcastTx";
 import { getLocalUtxos, removeUtxos } from "../../utils/utxoDB";
 import { getBalance } from "../../utxos/getBalance";
-import { G, userSpendPriv, userViewPriv  } from "../../keys";
+import { G, userSpendPriv, userViewPriv } from "../../keys";
 
 // send a tx to the client
 export async function endAndBroadcastTx(api: string, data: { recipientViewPub: string, recipientSpendPub: string, value: bigint }[], fee: bigint): Promise<string> {
@@ -41,7 +41,7 @@ export async function endAndBroadcastTx(api: string, data: { recipientViewPub: s
       }
     )
   } satisfies SignedPaymentTX;
-
+  console.log("signed tx");
   // broadcast the tx
   let txId = "Error";
   let broadcasted = false;
@@ -65,6 +65,17 @@ export async function endAndBroadcastTx(api: string, data: { recipientViewPub: s
 
   await getBalance([...Object.values(apres).flat()], { spendPub: G.mult(spendPriv).compress(), viewPriv: viewPriv });
 
+
+  const totalInputsAmount = Object.values(avant).flat().reduce((acc, curr) => acc + unmaskAmount(viewPriv, curr.rG, curr.amount), 0n);
+  const totalOutputsAmount = unmaskAmount(11n, outputs[0]![0].rG, outputs[0]![0].amount) + unmaskAmount(await userViewPriv(), outputs[1]![0].rG, outputs[1]![0].amount)
+  const totalFee = totalInputsAmount - totalOutputsAmount;//.reduce((acc, curr) => acc + curr, 0n);
+console.log("rrrrrrr\n", Object.values(apres).flat());
+  console.log("amount verif: \n",
+    totalInputsAmount.toString(), "\n",
+    totalOutputsAmount.toString(), "\n",
+    totalFee.toString(), "\n",
+    "change: ", totalInputsAmount - totalFee - unmaskAmount(11n, outputs[0]![0].rG, outputs[0]![0].amount),
+  )
 
   // return the txId
   return txId;
