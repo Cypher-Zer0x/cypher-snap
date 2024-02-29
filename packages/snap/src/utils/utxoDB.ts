@@ -6,8 +6,6 @@ import { userViewPriv } from "../keys";
 
 export async function saveUtxos(utxos: (PaymentUTXO | CoinbaseUTXO)[]): Promise<void> {
 
-
-
   // get state
   let state: UtxoStorage = await snap.request({
     method: 'snap_manageState',

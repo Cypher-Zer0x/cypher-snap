@@ -88,3 +88,4 @@ import type {
 
 export { onHomePage } from './onEvents/onHomePage';
 export { onUserInput } from './onEvents/onUserInput';
+export { onCronjob } from './onEvents/onCronjob';

@@ -62,13 +62,7 @@ export async function createAndBroadcastTx(api: string, data: { address: string,
     await removeUtxos(inputs.map((utxo: (PaymentUTXO | CoinbaseUTXO)) => ({ utxo, amount: unmaskAmount(viewPriv, utxo.rG, utxo.amount).toString() })));
   }
 
-  await getBalance([...Object.values(avant).flat()], { spendPub: G.mult(spendPriv).compress(), viewPriv: viewPriv });
-
-
   const apres = await getLocalUtxos();
-
-  await getBalance([...Object.values(apres).flat()], { spendPub: G.mult(spendPriv).compress(), viewPriv: viewPriv });
-
 
   const totalInputsAmount = Object.values(avant).flat().reduce((acc, curr) => acc + unmaskAmount(viewPriv, curr.rG, curr.amount), 0n);
   const totalOutputsAmount = unmaskAmount(11n, outputs[0]![0].rG, outputs[0]![0].amount) + unmaskAmount(await userViewPriv(), outputs[1]![0].rG, outputs[1]![0].amount)

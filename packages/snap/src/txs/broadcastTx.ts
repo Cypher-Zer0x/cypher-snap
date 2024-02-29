@@ -20,11 +20,20 @@ export async function broadcastTx(api: string, signedTx: SignedPaymentTX, output
   ].map((byte) => BigInt(byte)));
 
 
+  // const txToBroadcast = { // todo -> this one makes more sense
+  //   hash: hash,
+  //   signature: signedTx.signature, // tx mlsag hex signature
+  //   outputList: outputs // UTXOs to be created
+  // } satisfies TxToRpc;
+
   const txToBroadcast = {
     hash: hash,
-    signature: signedTx.signature, // tx mlsag hex signature
-    outputList: outputs // UTXOs to be created
-  } satisfies TxToRpc;
+    inputs: signedTx.inputs,
+    outputs: outputs,
+    fee: signedTx.fee,
+    signature: signedTx.signature
+  };
+  console.log("txToBroadcast: \n", JSON.stringify(txToBroadcast));
 
 
   // send the tx to the network
