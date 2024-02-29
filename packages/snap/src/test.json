@@ -1,35 +1,78 @@
-{
-  "ETH": {
-    "utxos": [
-      {
-        "version": "version",
-        "transaction_hash": "transaction_hash",
-        "output_index": 0,
-        "public_key": "02024759d5165761550cd5a4f5cb76f318eb859c56875afede4adbe7770f7eb96e",
-        "amount": "11001000111100111111111001010010111001111000000011111011001100000101001001111001101110010010101100101101100110011100111101010000001000100101000010010001110110000100110101100100110001001000101000011111000100011010001111100011111101001101110011100001101001",
-        "currency": "ETH",
-        "commitment": "02394042bba4fe1c04a6742b6aacb447c9d3745d9977ea13b65e73554d7cfec3a9",
-        "rangeProof": {
-          "V": "string",
-          "A": "string",
-          "S": "string",
-          "T1": "string",
-          "T2": "string",
-          "tx": "string",
-          "txbf": "string",
-          "e": "string",
-          "a0": "string",
-          "b0": "string",
-          "ind": [
-            {
-              "L": "string",
-              "R": "string"
-            }
-          ]
-        },
-        "rG": "0375c901a8a0760bcbcea850173f8cf1e8c1c4d37a02f6258e08448e157daa83db"
-      }
-    ],
-    "balance": "0153"
+[
+  {
+    "Payment": {
+      "amount": "111000011010101111011011000101001011001001000111000110001100101011000001110010001110010000000100000000100101011101000011110111111000011101011010111000000011010011010100111111000010000000000111111110000011000011000111110100011101101100001010001111111011001",
+      "commitment": "02aa46687f7e1f03c669097551545f1ef924e2530dc52915ecf89de8d8be9da3c0",
+      "currency": "ETH",
+      "hash": "0x0df6fdbec9dc26e03650edbe7540fdaf6db1c8e1009ae19884d6cc785ee480f2",
+      "output_index": 1,
+      "public_key": "0396f062c70bbe208b5a0ffe0cb08dbbbb5e3b00cefe79ad8f47a0a95aa18f3655",
+      "rG": "035dd95b685a155df381ff219fbce66ca4c31440b04bb1125777ac5af0a7fcdb83",
+      "rangeProof": {
+        "A": "string",
+        "S": "string",
+        "T1": "string",
+        "T2": "string",
+        "V": "string",
+        "a0": "string",
+        "b0": "string",
+        "e": "string",
+        "ind": [
+          {
+            "L": "string",
+            "R": "string"
+          }
+        ],
+        "tx": "string",
+        "txbf": "string"
+      },
+      "transaction_hash": "transaction_hash",
+      "version": "0x00"
+    }
+  },
+  {
+    "Payment": {
+      "amount": "1001100110110110100111011100010101111101110011110011000001111101101010101101000100100010000010011110100001101010111111110001011000011011101110010001010010000011100110010100111010111001001100000011111011111011011111101110100110010110010101011000110000011001",
+      "commitment": "0202df900a38c6abc7e8a5ed55de26634dc4b6fc48e0374dc3664c8cebb2204d8f",
+      "currency": "ETH",
+      "hash": "0x6429dd461806ff042af0d2453dfd51dbed237410ba43e6a0d5f8a1a5aed30bbd",
+      "output_index": 0,
+      "public_key": "0203a4b4f6123d2e7d5982db0192fbb572306b96d64435ab9f15823d7169e30efe",
+      "rG": "02d904b770d6c34d22346ab8cf02e0afa4baff4fb2cc64b4dd7cdbdbd521ac8a4d",
+      "rangeProof": {
+        "A": "string",
+        "S": "string",
+        "T1": "string",
+        "T2": "string",
+        "V": "string",
+        "a0": "string",
+        "b0": "string",
+        "e": "string",
+        "ind": [
+          {
+            "L": "string",
+            "R": "string"
+          }
+        ],
+        "tx": "string",
+        "txbf": "string"
+      },
+      "transaction_hash": "transaction_hash",
+      "version": "0x00"
+    }
+  },
+  {
+    "Coinbase": {
+      "amount": "100000",
+      "commitment": "02601c48be69bd381a961e3b599aec74474c275df1c0e510934643a4f499d2d835",
+      "currency": "ETH",
+      "hash": "755822a799f564b0a141822e221d979aad20890997722293b6fbb9057a026415",
+      "output_index": 0,
+      "public_key": "pubkeyeuey",
+      "rG": "sjsjsjssj",
+      "transaction_hash": "deposit",
+      "unlock_time": null,
+      "version": "0x01"
+    }
   }
-}
+]

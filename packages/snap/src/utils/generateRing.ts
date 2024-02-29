@@ -7,7 +7,7 @@ export async function generateRing(): Promise<Point[][]> { // todo: GET RING FRO
   const ring: Point[][] = [];
   for (let i = 0; i < 5; i++) {
     const ringElement: Point[] = [];
-    for (let j = 0; j < 5; j++) {
+    for (let j = 0; j < 2; j++) {
       ringElement.push(G.mult(BigInt(1 + Math.floor(Math.random()))));
     }
     ring.push(ringElement);

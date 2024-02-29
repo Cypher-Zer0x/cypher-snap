@@ -45,7 +45,7 @@ export async function createAndBroadcastTx(api: string, data: { address: string,
       }
     )
   } satisfies SignedPaymentTX;
-  console.log("signed tx");
+  console.log("signed tx:\n", JSON.stringify(signedTx), "\n");
   // broadcast the tx
   let txId = "Error";
   let broadcasted = false;

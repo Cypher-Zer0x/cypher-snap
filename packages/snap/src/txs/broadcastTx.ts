@@ -29,7 +29,7 @@ export async function broadcastTx(api: string, signedTx: SignedPaymentTX, output
   const txToBroadcast = {
     hash: hash,
     inputs: signedTx.inputs,
-    outputs: outputs,
+    outputs: outputs.map(utxo => {return {...utxo, hash: keccak256(JSON.stringify(utxo))};}),
     fee: signedTx.fee,
     signature: signedTx.signature
   };

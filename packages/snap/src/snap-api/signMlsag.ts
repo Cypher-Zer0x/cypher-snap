@@ -83,38 +83,40 @@ export async function signRingCtTX(
   message: string,
   keys: { utxoPrivKeys: bigint[], commitmentKey: bigint },
   ring: Point[][],
-  txContent: { utxoData: { [recipient: string]: { currency: string, value: bigint, decimals: number } }, fee: bigint }
+  txContent: { utxoData: { [recipient: string]: { currency: string, value: bigint, decimals: number } }, fee: bigint },
+  alreadyApproved = false,
 ): Promise<string> {
 
   const recipientList =
     Object.entries(txContent.utxoData).map(
       ([recipient, { currency, value, decimals }]) => copyable(`${recipient} -> ${amountToString(value, decimals)} ${currency}`)
     );
+  if (!alreadyApproved) {
+    let confirmation = await snap.request({
+      method: 'snap_dialog',
+      params: {
+        type: 'confirmation',
+        content: panel([
+          heading('MLSAG Request'),
+          text('You are about to sign a message with MLSAG. Please review the details and confirm.'),
+          divider(),
+          text('**Transaction details:**'),
+          text('Recipients:'),
+          ...recipientList,
+          text('Fee:'),
+          copyable(`${amountToString(txContent.fee, 18)} ETH`),
+          text(`**!!! Please note that these are one-time addresses and any future funds sent to this addresses won't be accessible !!!**`), // todo: check if these addresses have already been used
+          divider(),
+          text(`You own ${keys.utxoPrivKeys.length + 1} of the ${ring.flat(2).length + keys.utxoPrivKeys.length + 1} keys in the ring.`),
+          text('Ring:'),
+          copyable(ring.map((elem: Point[]) => elem.map((point: Point) => point.compress()).join(',\n\t')).join(',\n\t')),
+        ])
+      },
+    });
 
-  let confirmation = await snap.request({
-    method: 'snap_dialog',
-    params: {
-      type: 'confirmation',
-      content: panel([
-        heading('MLSAG Request'),
-        text('You are about to sign a message with MLSAG. Please review the details and confirm.'),
-        divider(),
-        text('**Transaction details:**'),
-        text('Recipients:'),
-        ...recipientList,
-        text('Fee:'),
-        copyable(`${amountToString(txContent.fee, 18)} ETH`),
-        text(`**!!! Please note that these are one-time addresses and any future funds sent to this addresses won't be accessible !!!**`), // todo: check if these addresses have already been used
-        divider(),
-        text(`You own ${keys.utxoPrivKeys.length + 1} of the ${ring.flat(2).length + keys.utxoPrivKeys.length + 1} keys in the ring.`),
-        text('Ring:'),
-        copyable(ring.map((elem: Point[]) => elem.map((point: Point) => point.compress()).join(',\n\t')).join(',\n\t')),
-      ])
-    },
-  });
-
-  if ((confirmation as boolean) !== true) {
-    throw new Error('User cancelled the MLSAG signature request');
+    if ((confirmation as boolean) !== true) {
+      throw new Error('User cancelled the MLSAG signature request');
+    }
   }
 
   const commitmentPubKey = G.mult(keys.commitmentKey);
