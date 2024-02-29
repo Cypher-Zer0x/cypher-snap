@@ -88,7 +88,7 @@ export async function signRingCtTX(
 
   const recipientList =
     Object.entries(txContent.utxoData).map(
-      ([recipient, { currency, value, decimals }]) => copyable(`Recipient: ${recipient} -> ${amountToString(value, decimals)} ${currency}`)
+      ([recipient, { currency, value, decimals }]) => copyable(`${recipient} -> ${amountToString(value, decimals)} ${currency}`)
     );
 
   let confirmation = await snap.request({
@@ -99,9 +99,11 @@ export async function signRingCtTX(
         heading('MLSAG Request'),
         text('You are about to sign a message with MLSAG. Please review the details and confirm.'),
         divider(),
-        text('Transaction details:'),
+        text('**Transaction details:**'),
+        text('Recipients:'),
         ...recipientList,
-        copyable(`Fee: ${amountToString(txContent.fee, 18)} ETH`),
+        text('Fee:'),
+        copyable(`${amountToString(txContent.fee, 18)} ETH`),
         text(`**!!! Please note that these are one-time addresses and any future funds sent to this addresses won't be accessible !!!**`), // todo: check if these addresses have already been used
         divider(),
         text(`You own ${keys.utxoPrivKeys.length + 1} of the ${ring.flat(2).length + keys.utxoPrivKeys.length + 1} keys in the ring.`),

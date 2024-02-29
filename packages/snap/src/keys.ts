@@ -1,6 +1,8 @@
 import { Curve, CurveName } from "./utils";
 import { keccak256 } from "./utils";
 
+export const api = "https://api.zer0x.xyz";
+
 export const G = (new Curve(CurveName.SECP256K1)).GtoPoint();
 export const H = G.mult(123n); // NOT SECURE. DO NOT USE IN PRODUCTION
 

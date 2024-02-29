@@ -1,10 +1,10 @@
 // import { Component, OnTransactionHandler, OnUserInputHandler, Transaction, UserInputEventType } from '@metamask/snaps-sdk';
 import { Curve, CurveName } from "./utils";
 import { signMlsag } from './snap-api';
-import { endAndBroadcastTx } from './txs/ringCt/endAndBroadcastTx';
+import { createAndBroadcastTx } from './txs/ringCt/createAndBroadcastTx';
 import {
   ButtonType,
-  ManageStateOperation,
+  // ManageStateOperation,
   address,
   button,
   copyable,
@@ -14,46 +14,14 @@ import {
   panel,
   row,
   text,
-  assert,
+  // assert,
 } from '@metamask/snaps-sdk';
 import { getUtxos } from './node-api/getUtxos';
-
-const G = (new Curve(CurveName.SECP256K1)).GtoPoint();
-const api = "https://api.zer0x.xyz";
-
-import type { OnHomePageHandler, OnRpcRequestHandler } from '@metamask/snaps-sdk';
 import { getBalance } from "./utxos";
 import { CoinbaseUTXO, PaymentUTXO } from "./interfaces";
-import { addressFromPubKeys, pubKeysFromAddress } from "./keys";
+import { G, addressFromPubKeys, api } from "./keys";
 
-export const onHomePage: OnHomePageHandler = async () => {
-  /* 
-  display :
-  - eth balance
-  - display address (copyable)
-  - token balance
-  - send button (eth and tokens)
-  - view utxos
-  - view tx history
-  */
-  return {
-    content: panel([
-      heading('Hello world!'),
-      text('Welcome to my Snap home page!'),
-      // button('Display address', ButtonType.Button, 'Display address'),
-      // form({
-      //   name: 'example-form',
-      //   children: [
-      //     input({
-      //       name: 'example-input',
-      //       placeholder: 'Enter something...',
-      //     }),
-      //     button('Submit', ButtonType.Submit, 'submit'),
-      //   ],
-      // }),
-    ]),
-  };
-};
+
 
 /**
  * Handle incoming JSON-RPC requests, sent through `wallet_invokeSnap`.
@@ -98,10 +66,25 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
 
       const fee = 10n;
       
-      return await endAndBroadcastTx(api, data, fee)
+      return await createAndBroadcastTx(api, data, fee)
     // return JSON.stringify(await getUtxos(api));
 
     default:
       throw new Error('Method not found.');
   }
 };
+
+
+
+
+
+
+
+import type {
+  OnRpcRequestHandler,
+} from '@metamask/snaps-sdk';
+
+
+
+export { onHomePage } from './onEvents/onHomePage';
+export { onUserInput } from './onEvents/onUserInput';
