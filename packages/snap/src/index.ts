@@ -25,19 +25,6 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
   request,
 }) => {
   switch (request.method) {
-    // case 'hello':
-    //   await resetState();
-    //   const data = [
-    //     {
-    //       address: await addressFromPubKeys(G.mult(12n).compress(), G.mult(11n).compress()),
-    //       value: 100n
-    //     }
-    //   ];
-
-    //   const fee = 10n;
-
-    //   return await createAndBroadcastTx(api, data, fee);
-
     case "zer0x-address":
       return await userAddress();
 
@@ -51,7 +38,6 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
         pubkey: pub.compress(),
         rG: G.mult(r).compress(),
       }
-
 
     default:
       throw new Error('Method not found.');
