@@ -8,6 +8,7 @@ import {
   divider,
   form,
   heading,
+  image,
   input,
   panel,
   row,
@@ -16,12 +17,13 @@ import {
 import { api, pubKeysFromAddress, userAddress, userSpendPriv, userViewPriv } from "../keys";
 import { setupRingCt } from '../txs/ringCt/setupRingCt';
 import { CoinbaseUTXO, PaymentUTXO, SignedPaymentTX } from '../interfaces';
-import { Point, generateRing, keccak256, unmaskAmount } from '../utils';
+import { Point, amountToString, generateRing, keccak256, unmaskAmount } from '../utils';
 import { signRingCtTX } from '../snap-api';
 import { broadcastTx } from '../txs/broadcastTx';
 import { getLocalUtxos, removeUtxos } from '../utils/utxoDB';
 import { checkSendTxParams } from './onUserInput';
 import { amountFromString } from '../utils/convert-types/stringToAmount';
+import { stringFromAmount } from '../utils/convert-types/stringFromAmount';
 
 /**
  * Initiate a new interface with the starting screen.
@@ -36,9 +38,16 @@ export async function createInterface(): Promise<string> {
 }
 
 export async function homeUi() {
+  const state = await getLocalUtxos();
+  let balance: bigint = 0n;
+  for (let amount in state) {
+    console.log("amount: ", amount);
+    balance += BigInt(amount) * BigInt(state[amount]!.length);
+  }
+  const strBalance = stringFromAmount(balance, 18);
   return {
     ui: panel([
-      heading('**should display eth balance**'),
+      heading(`${strBalance} ETH`),
       copyable(await userAddress()),
       button({ value: 'Send', name: 'send' }),
       divider(),
@@ -87,16 +96,14 @@ export async function newTx(id: string) {
  * @param id -  The interface ID to update.
  */
 export async function sendTxFromExpended(id: string, event: any): Promise<{ ui: Panel }> {
-  console.log('BEFORE CHECK, sendTxFromExpended', event);
   if (!checkSendTxParams(event)) throw new Error("Invalid parameters");
-  console.log('AFTER CHECK, sendTxFromExpended');
   const data = [{ address: event.value['tx-receiver']!, value: BigInt(event.value['amount']!) }]
   const fee = BigInt(event.value['fee']!);
+  console.log("fee sendTxFromExpended: ", event.value['fee']);
+  console.log("dataaaaa: ", data);
 
 
   const { unsignedTx, inputs, outputs } = await setupRingCt(data, fee);
-
-  const avant = await getLocalUtxos();
 
 
   // get the blinding factors and sum them
@@ -113,10 +120,6 @@ export async function sendTxFromExpended(id: string, event: any): Promise<{ ui: 
 
   const signedTx = {
     ...unsignedTx,
-    // message: string,
-    // keys: { utxoPrivKeys: bigint[], commitmentKey: bigint },
-    // ring: Point[][],
-    // txContent: { utxoData: { [recipient: string]: { currency: string, value: bigint, decimals: number } }, fee: bigint }
     signature: await signRingCtTX(
       JSON.stringify(unsignedTx),
       {
@@ -131,7 +134,7 @@ export async function sendTxFromExpended(id: string, event: any): Promise<{ ui: 
       true
     )
   } satisfies SignedPaymentTX;
-  console.log("signed tx:\n", JSON.stringify(signedTx), "\n");
+  // console.log("signed tx:\n", JSON.stringify(signedTx), "\n");
   // broadcast the tx
   let txId = "Error";
   let broadcasted = false;
@@ -147,7 +150,7 @@ export async function sendTxFromExpended(id: string, event: any): Promise<{ ui: 
     // remove the utxos from the local storage
     await removeUtxos(inputs.map((utxo: (PaymentUTXO | CoinbaseUTXO)) => ({ utxo, amount: unmaskAmount(viewPriv, utxo.rG, utxo.amount).toString() })));
   }
- 
+
   return {
     ui: panel([
       heading('Tokens sent'),
@@ -155,11 +158,11 @@ export async function sendTxFromExpended(id: string, event: any): Promise<{ ui: 
       copyable(txId),
       divider(),
       text('You sent:'),
-      copyable(data[0]!.value.toString() + " ETH"),
+      copyable(amountToString(data[0]!.value, 18) + " ETH"),
       text('To:'),
       copyable(data[0]!.address),
       text('With a fee of:'),
-      copyable(fee.toString() + " ETH"),
+      copyable(amountToString(fee, 18) + " ETH"),
       divider(),
       button({ value: 'Home', name: 'go-home', variant: 'secondary' }),
     ]),
@@ -200,7 +203,7 @@ export async function validTx(id: string, event: any): Promise<{ ui: Panel }> {
       //     button('Submit', ButtonType.Submit, 'sumbit'),
       //   ],
       // }),
-      button({ value: 'Sign', name: 'submit-tx+'+ JSON.stringify({ 'tx-receiver': event.value['tx-receiver']!, amount: amountFromString(event.value['amount']!, 18).toString(), fee: amountFromString(fee, 18).toString()}), variant: 'primary'}),
+      button({ value: 'Sign', name: 'submit-tx+' + JSON.stringify({ 'tx-receiver': event.value['tx-receiver']!, amount: amountFromString(event.value['amount']!, 18).toString(), fee: amountFromString(fee, 18).toString() }), variant: 'primary' }),
       button({ value: 'Cancel', name: 'go-home', variant: 'secondary' }),
     ]),
   }

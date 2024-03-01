@@ -2,20 +2,6 @@
 import { Curve, CurveName } from "./utils";
 import { signMlsag } from './snap-api';
 import { createAndBroadcastTx } from './txs/ringCt/createAndBroadcastTx';
-import {
-  ButtonType,
-  // ManageStateOperation,
-  address,
-  button,
-  copyable,
-  form,
-  heading,
-  input,
-  panel,
-  row,
-  text,
-  // assert,
-} from '@metamask/snaps-sdk';
 import { getUtxos } from './node-api/getUtxos';
 import { getBalance } from "./utxos";
 import { CoinbaseUTXO, PaymentUTXO } from "./interfaces";
@@ -38,23 +24,6 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
   request,
 }) => {
   switch (request.method) {
-    case 'hello1': // cypher_snap_mlsag_request
-
-      const utxos = await getUtxos("https://api.zer0x.xyz");
-      const balance = getBalance(utxos as (PaymentUTXO | CoinbaseUTXO)[], { spendPub: G.mult(11111111n).compress(), viewPriv: 12344555n });
-
-      return await snap.request({
-        method: 'snap_dialog',
-        params: {
-          type: 'confirmation',
-          content: panel([
-            heading('MLSAG Request'),
-            text('You are about to sign a message with MLSAG. Please review the details and confirm.'),
-            copyable(JSON.stringify(balance)),
-          ])
-        },
-      });
-
     case 'hello':
 
       const data = [

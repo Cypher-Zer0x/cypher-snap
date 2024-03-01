@@ -37,19 +37,6 @@ export const onUserInput: OnUserInputHandler = async ({ id, event }) => {
         await newTx(id);
         break;
 
-      // case 'submit-tx':
-      //   console.log("SUBMIT TX");
-      //   await snap.request({
-      //     method: 'snap_updateInterface',
-      //     params: {
-      //       id,
-      //       ui: (await sendTxFromExpended(id, event)).ui,
-      //     },
-      //   });
-
-      //   break;
-
-
       default:
         break;
     }
@@ -58,8 +45,11 @@ export const onUserInput: OnUserInputHandler = async ({ id, event }) => {
       console.log('CUSTOM EVENT');
       try {
         const data = JSON.parse(event.name.split('+')[1]!);
-        const fee = amountFromString(data.fee, 18);
-        const e = { value: { ...data, fee: fee.toString() } };
+        const fee = BigInt(data.fee);
+        console.log("feeeeee:" , fee);
+        console.log("datafeeeeee: ", data.amount);
+        const e = { value: { 'tx-receiver': data['tx-receiver'], amount: data.amount, fee: fee.toString() } };
+        console.log("eeeeee: ", e.value);
         await snap.request({
           method: 'snap_updateInterface',
           params: {
@@ -74,18 +64,8 @@ export const onUserInput: OnUserInputHandler = async ({ id, event }) => {
   }
 
   if (event.type === UserInputEventType.FormSubmitEvent) {
-    console.log("---------------event name: ", event.name, event.name === 'valid-tx');
+    // console.log("---------------event name: ", event.name, event.name === 'valid-tx');
     switch (event.name) {
-      // case "newTxForm":
-      //   console.log("NEW TX FORM");
-      //   // console.log("event: ", event.name, event.name.length, event.name );
-      //   // console.log("event: ", JSON.stringify(event.value));
-      //   if (!checkSendTxParams(event)) throw new Error("Invalid parameters");
-      //   const data = [{ address: event.value['tx-receiver']!, value: amountFromString(event.value['amount']!, 18) }]
-
-      //   const fee = event.value['fee'];
-      //   await createAndBroadcastTx(api, data, amountFromString(fee!, 18));
-      //   break;
 
       case 'valid-tx':
         console.log("VALID TX");
@@ -104,8 +84,7 @@ export const onUserInput: OnUserInputHandler = async ({ id, event }) => {
     }
   }
 
-
-  console.log("event: ", event);
+  // console.log("event: ", event);
 };
 
 // check if the event contains all the required parameters
@@ -117,18 +96,18 @@ export function checkSendTxParams(event: any): boolean {
     return false;
   }
 
-  // try {
-  //   amountFromString(event.value['amount'], 18);
-  //   amountFromString(event.value['fee'], 18);
-  // } catch (e) {
-  //   console.log("1");
-  //   return false;
-  // }
+  try {
+    amountFromString(event.value['amount'], 18);
+    amountFromString(event.value['fee'], 18);
+  } catch (e) {
+    console.log("1");
+    return false;
+  }
 
-  // if (amountFromString(event.value['amount'], 18) <= 0 || amountFromString(event.value['fee'], 18) <= 0) {
-  //   console.log("2");
-  //   return false;
-  // }
+  if (amountFromString(event.value['amount'], 18) <= 0 || amountFromString(event.value['fee'], 18) <= 0) {
+    console.log("2");
+    return false;
+  }
 
   // check if the tx-receiver is a valid zer0x address
   if (!isAddressValid(event.value['tx-receiver'])) {
