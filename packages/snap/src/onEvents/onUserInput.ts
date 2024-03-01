@@ -74,7 +74,7 @@ export const onUserInput: OnUserInputHandler = async ({ id, event }) => {
             ui: (await displayUtxos()).ui,
           },
         });
-        break;
+        break;        
 
       default:
         break;

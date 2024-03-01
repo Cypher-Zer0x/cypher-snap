@@ -1,9 +1,9 @@
 import type {
   OnRpcRequestHandler,
 } from '@metamask/snaps-sdk';
-import { resetState } from './utils/utxoDB';
-import { createAndBroadcastTx } from './txs/ringCt/createAndBroadcastTx';
-import { G, addressFromPubKeys, api } from "./keys";
+import { G, userAddress, userSpendPub, userViewPub } from "./keys";
+import { randomBigint } from './snap-api/signMlsag';
+import { Curve, CurveName, Point, keccak256 } from './utils';
 
 export { onHomePage } from './onEvents/onHomePage';
 export { onUserInput } from './onEvents/onUserInput';
@@ -25,27 +25,33 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
   request,
 }) => {
   switch (request.method) {
-    case 'hello':
-      await resetState();
-      const data = [
-        {
-          address: await addressFromPubKeys(G.mult(12n).compress(), G.mult(11n).compress()),
-          value: 100n
-        }
-      ];
+    // case 'hello':
+    //   await resetState();
+    //   const data = [
+    //     {
+    //       address: await addressFromPubKeys(G.mult(12n).compress(), G.mult(11n).compress()),
+    //       value: 100n
+    //     }
+    //   ];
 
-      const fee = 10n;
+    //   const fee = 10n;
 
-      // // return await createAndBroadcastTx(api, data, fee)
-      // // return JSON.stringify(await getUtxos(api));
-      // console.log('Retrieving new UTXOs...')
-      // const utxos = await getUtxos("https://api.zer0x.xyz")
-      // console.log("FETCHING UTXOS", utxos);
-      // // save the balance to the local storage
-      // await saveUtxos(utxos as (PaymentUTXO | CoinbaseUTXO)[]);
+    //   return await createAndBroadcastTx(api, data, fee);
 
-      // console.log('Utxos retrieved and saved to local storage:\n', await getLocalUtxos());
-      return await createAndBroadcastTx(api, data, fee);
+    case "zer0x-address":
+      return await userAddress();
+
+    case "zer0x-deposit-payload":
+      const P = (new Curve(CurveName.SECP256K1)).P;
+      const r = randomBigint(P);
+      const pub =
+        G.mult(BigInt(keccak256(Point.decompress(await userViewPub()).mult(r).compress()))).add(Point.decompress(await userSpendPub())); 
+
+      return {
+        pubkey: pub.compress(),
+        rG: G.mult(r).compress(),
+      }
+
 
     default:
       throw new Error('Method not found.');
