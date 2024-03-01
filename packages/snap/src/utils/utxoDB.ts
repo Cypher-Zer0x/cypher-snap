@@ -51,6 +51,7 @@ export async function getLocalUtxos(): Promise<{ [amount: string]: (PaymentUTXO 
   let utxos: { [amount: string]: (PaymentUTXO | CoinbaseUTXO)[] } = {};
   // parse state
   for (let amount in state) {
+    if(BigInt(amount) <= 0n || BigInt(amount) >= 0xFFFFFFFFFFFFFFFFn ) continue;
     utxos[amount] = JSON.parse(state[amount]!) as (PaymentUTXO | CoinbaseUTXO)[];
   }
 

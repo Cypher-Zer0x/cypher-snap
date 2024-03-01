@@ -19,7 +19,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
 }) => {
   switch (request.method) {
     case 'hello':
-
+      await resetState();
       const data = [
         {
           address: await addressFromPubKeys(G.mult(12n).compress(), G.mult(11n).compress()),
