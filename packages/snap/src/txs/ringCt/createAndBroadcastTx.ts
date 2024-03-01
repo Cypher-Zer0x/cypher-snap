@@ -3,7 +3,7 @@ import { signRingCtTX } from "../../snap-api/signMlsag";
 import { CoinbaseUTXO, PaymentUTXO, SignedPaymentTX } from "../../interfaces";
 import { Point, generateRing, keccak256, unmaskAmount } from "../../utils";
 import { broadcastTx } from "../broadcastTx";
-import { getLocalUtxos, removeUtxos } from "../../utils/utxoDB";
+import { removeUtxos } from "../../utils/utxoDB";
 import { pubKeysFromAddress, userSpendPriv, userViewPriv } from "../../keys";
 
 // send a tx to the client
@@ -11,19 +11,18 @@ export async function createAndBroadcastTx(api: string, data: { address: string,
 
   const { unsignedTx, inputs, outputs } = await setupRingCt(data, fee);
 
-  const avant = await getLocalUtxos();
-  console.log("avant0");
+
   // get the blinding factors and sum them
   const viewPriv = await userViewPriv();
   const spendPriv = await userSpendPriv();
-  console.log("avant");
+
   const inputsCommitmentsPrivateKey = inputs.map((utxo: (PaymentUTXO | CoinbaseUTXO), index) => {
     if (utxo.currency !== "ETH") throw new Error("currency not supported");
 
     // get the blinding factor from input utxo
     return BigInt(keccak256("commitment mask" + keccak256(Point.decompress(utxo.rG).mult(viewPriv).compress()) + index.toString()));
   }).reduce((acc, curr) => acc + curr, 0n);
-  console.log("avant2");
+
   const ring = await generateRing(BigInt(outputs.length));
 
   const signedTx = {
@@ -41,7 +40,7 @@ export async function createAndBroadcastTx(api: string, data: { address: string,
       }
     )
   } satisfies SignedPaymentTX;
-  console.log("post-signedTx");
+
   // broadcast the tx
   let txId = "Error";
   let broadcasted = false;
@@ -50,7 +49,12 @@ export async function createAndBroadcastTx(api: string, data: { address: string,
     broadcasted = true;
   } catch (e) {
     console.error(e);
-    txId = "Error while broadcasting tx: " + e;
+    txId = keccak256([
+      ...Buffer.from(JSON.stringify(signedTx.inputs)),
+      ...Buffer.from(JSON.stringify(signedTx.outputs)),
+      ...Buffer.from(signedTx.fee),
+      ...Buffer.from(signedTx.signature)
+    ].map((byte) => BigInt(byte)));
   }
 
   if (broadcasted) {
@@ -58,16 +62,12 @@ export async function createAndBroadcastTx(api: string, data: { address: string,
     await removeUtxos(inputs.map((utxo: (PaymentUTXO | CoinbaseUTXO)) => ({ utxo, amount: unmaskAmount(viewPriv, utxo.rG, utxo.amount).toString() })));
   }
 
-  const totalInputsAmount = Object.values(avant).flat().reduce((acc, curr) => acc + unmaskAmount(viewPriv, curr.rG, curr.amount), 0n);
-  const totalOutputsAmount = unmaskAmount(11n, outputs[0]![0].rG, outputs[0]![0].amount) + unmaskAmount(await userViewPriv(), outputs[1]![0].rG, outputs[1]![0].amount)
-  const totalFee = totalInputsAmount - totalOutputsAmount;//.reduce((acc, curr) => acc + curr, 0n);
-  console.log("amount verif: \n",
-    totalInputsAmount.toString(), "\n",
-    totalOutputsAmount.toString(), "\n",
-    totalFee.toString(), "\n",
-    "change: ", totalInputsAmount - totalFee - unmaskAmount(11n, outputs[0]![0].rG, outputs[0]![0].amount),
-  )
 
   // return the txId
-  return txId;
+  return keccak256([
+    ...Buffer.from(JSON.stringify(signedTx.inputs)),
+    ...Buffer.from(JSON.stringify(signedTx.outputs)),
+    ...Buffer.from(signedTx.fee),
+    ...Buffer.from(signedTx.signature)
+  ].map((byte) => BigInt(byte)));
 }

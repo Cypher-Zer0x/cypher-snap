@@ -1,8 +1,7 @@
 import { Curve, CurveName, Point, keccak256, maskAmount } from "../../utils";
 import { CoinbaseUTXO, LightRangeProof, PaymentUTXO, UnsignedPaymentTX } from "../../interfaces";
-import { getLocalUtxos, resetState, saveUtxos } from "../../utils/utxoDB";
-import { randomBigint } from "@cypherlab/types-ring-signature/dist/src/utils/randomNumbers";
-import { getRangeProof } from "../../utils/rangeProof";
+import { getLocalUtxos } from "../../utils/utxoDB";
+import { randomBigint } from "../../snap-api/signMlsag";
 import { userSpendPub, userViewPub, G, H, pubKeysFromAddress } from "../../keys";
 
 
@@ -51,7 +50,7 @@ export async function setupRingCt(
 
   // get all the utxos from the metamask storage
   const utxos = await getLocalUtxos();
-
+  console.log("utxos: ", JSON.stringify(utxos));
   // select the utxos to spend (such as sum of utxos > amount + fee)
   const amounts = Object.keys(utxos);
   const selectedUtxos: (PaymentUTXO | CoinbaseUTXO)[] = [];
@@ -152,7 +151,7 @@ export async function setupRingCt(
   console.log("avant tx");
   // generate the tx
   const tx: UnsignedPaymentTX = {
-    inputs: selectedUtxos.map(utxo => (keccak256(JSON.stringify(utxo)))),
+    inputs: selectedUtxos.map(utxo => (utxo as any).hash),
     outputs: outputUtxos.map(utxo => (keccak256(JSON.stringify(utxo)))),
     fee: '0x' + fee.toString(16),
   } satisfies UnsignedPaymentTX;

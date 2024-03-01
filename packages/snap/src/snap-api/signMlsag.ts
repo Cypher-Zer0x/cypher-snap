@@ -1,4 +1,3 @@
-import { piSignature, randomBigint } from '@cypherlab/types-ring-signature';
 import { keccak256 } from '../utils';
 import { panel, text, heading, divider, copyable } from '@metamask/snaps-ui';
 import { Mlsag } from '../interfaces';
@@ -229,4 +228,70 @@ export function hexDecodeMLSAG(hex: string): Mlsag {
     message: obj.message,
     keyImages: obj.keyImages.map((point: string) => Point.decompress(point))
   };
+}
+
+
+/**
+ * Compute the signature from the actual signer
+ *
+ * @remarks
+ * This function is used to compute the signature of the actual signer in a ring signature scheme.
+ *
+ * @param alpha - the alpha value
+ * @param c - the seed
+ * @param signerPrivKey - the private key of the signer
+ * @param Curve - the curve to use
+ *
+ * @returns the signer response as a point on the curve
+ */
+export function piSignature(
+  alpha: bigint,
+  c: bigint,
+  signerPrivKey: bigint,
+  curve: Curve,
+): bigint {
+  if (
+    alpha === BigInt(0) ||
+    c === BigInt(0) ||
+    signerPrivKey === BigInt(0) ||
+    curve.N === BigInt(0)
+  )
+    throw new Error("Invalid input");
+  return modulo(alpha - c * signerPrivKey, curve.N);
+}
+
+function modulo(n: bigint, p: bigint): bigint {
+  const result = n % p;
+  return result >= 0n ? result : result + p;
+}
+
+//eslint-disable-next-line @typescript-eslint/no-var-requires
+const randomBytes = require("crypto-browserify").randomBytes;
+
+/**
+ * generate a random bigint in [1,max[
+ *
+ * @param max the max value of the random number
+ * @returns the random bigint
+ */
+
+export function randomBigint(max: bigint): bigint {
+  if (max <= 0n) {
+    throw new Error("max must be greater than 0");
+  }
+
+  // +1 to ensure we can reach max value
+  const byteSize = (max.toString(16).length + 1) >> 1;
+
+  //we use a while loop as a safeguard against the case where the random number is greater than the max value
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    const array = randomBytes(byteSize);
+    const randomHex = array.toString("hex");
+    const randomBig = BigInt("0x" + randomHex);
+
+    if (randomBig < max) {
+      return randomBig;
+    }
+  }
 }

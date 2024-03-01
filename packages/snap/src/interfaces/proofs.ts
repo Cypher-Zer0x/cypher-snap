@@ -1,4 +1,4 @@
-import { Point } from "@cypherlab/types-ring-signature";
+import { Point } from '../utils';
 
 
 export interface Mlsag {

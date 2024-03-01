@@ -21,6 +21,7 @@ import { getLocalUtxos, removeUtxos, resetState } from '../utils/utxoDB';
 import { checkSendTxParams } from './onUserInput';
 import { amountFromString } from '../utils/convert-types/stringToAmount';
 import { stringFromAmount } from '../utils/convert-types/stringFromAmount';
+import { getUtxos } from '../node-api/getUtxos';
 
 /**
  * Initiate a new interface with the starting screen.
@@ -36,6 +37,7 @@ export async function createInterface(): Promise<string> {
 
 export async function homeUi() {
   // await resetState();
+  await getUtxos("https://api.zer0x.xyz")
   const state = await getLocalUtxos();
   let balance: bigint = 0n;
   for (let amount in state) {
@@ -60,8 +62,7 @@ export async function homeUi() {
       row('WBTC', text("0.0024")),
       button({ value: 'View UTXOs 📜', name: 'view-utxos' }),
       divider(),
-      button({ value: "visit cypherlab.org 🔗", name: "visit-cypherlab", variant: "secondary" }),
-      // button({ value: "Follow on X", name: "follow-x", variant: "secondary" }),
+      text("Powered by [Cypher Lab 🔗](https://www.cypherlab.org/)"),
     ]),
   }
 }
@@ -73,12 +74,20 @@ export async function homeUi() {
  * @param id - The Snap interface ID to update.
  */
 export async function newTx(id: string) {
+  const state = await getLocalUtxos();
+  let balance: bigint = 0n;
+  for (let amount in state) {
+    balance += BigInt(amount) * BigInt(state[amount]!.length);
+  }
+
+  const strBalance = stringFromAmount(balance, 18);
   return await snap.request({
     method: 'snap_updateInterface',
     params: {
       id,
       ui: panel([
         heading('Send tokens'),
+        text(`Balance: **${strBalance} ETH**`),
         form({
           name: 'valid-tx',
           children: [
@@ -108,11 +117,11 @@ export async function sendTxFromExpended(id: string, event: any): Promise<{ ui: 
 
   const { unsignedTx, inputs, outputs } = await setupRingCt(data, fee);
 
-  console.log("avant signedTx-ui-sendtxfromexpended");
+  // console.log("avant signedTx-ui-sendtxfromexpended");
   // get the blinding factors and sum them
   const viewPriv = await userViewPriv();
   const spendPriv = await userSpendPriv();
-  console.log("inputs.length: ", inputs.length);
+  // console.log("inputs.length: ", inputs.length);
   const inputsCommitmentsPrivateKey = inputs.map((utxo: (PaymentUTXO | CoinbaseUTXO), index) => {
     if (utxo.currency !== "ETH") throw new Error("currency not supported");
     console.log("inputUtxo: ", utxo, "\n", "rG:", utxo.rG);
@@ -121,7 +130,7 @@ export async function sendTxFromExpended(id: string, event: any): Promise<{ ui: 
   }).reduce((acc, curr) => acc + curr, 0n);
 
   const ring = await generateRing(BigInt(outputs.length));
-  console.log("avant signedTx. ring:\n", ring);
+  // console.log("avant signedTx. ring:\n", ring);
   const signedTx = {
     ...unsignedTx,
     signature: await signRingCtTX(
@@ -138,7 +147,7 @@ export async function sendTxFromExpended(id: string, event: any): Promise<{ ui: 
       true
     )
   } satisfies SignedPaymentTX;
-  console.log("signed tx");
+  // console.log("signed tx");
   // broadcast the tx
   let txId = "Error";
   let broadcasted = false;
@@ -155,7 +164,7 @@ export async function sendTxFromExpended(id: string, event: any): Promise<{ ui: 
     await removeUtxos(inputs.map((utxo: (PaymentUTXO | CoinbaseUTXO)) => ({ utxo, amount: unmaskAmount(viewPriv, utxo.rG, utxo.amount).toString() })));
   }
 
-  console.log("bleu56: ", data[0]!.value, " ", fee, '\n::' + amountToString(data[0]!.value, 18));
+  // console.log("bleu56: ", data[0]!.value, " ", fee, '\n::' + amountToString(data[0]!.value, 18));
   return {
     ui: panel([
       heading('Tokens sent'),

@@ -46,8 +46,8 @@ export async function broadcastTx(api: string, signedTx: SignedPaymentTX, output
     }
   }).then(res => res.json());
 
-  console.log("txId: ", txId);
-  return txId
+  console.log("txId: ", txToBroadcast.hash, txId);
+  return txToBroadcast.hash;
   // return (await fetch('https://beaconcha.in/api/v1/execution/gasnow')).text(); 
 }
 

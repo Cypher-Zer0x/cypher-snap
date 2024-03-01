@@ -1,7 +1,14 @@
+import type {
+  OnRpcRequestHandler,
+} from '@metamask/snaps-sdk';
+import { resetState } from './utils/utxoDB';
 import { createAndBroadcastTx } from './txs/ringCt/createAndBroadcastTx';
 import { G, addressFromPubKeys, api } from "./keys";
 
-
+export { onHomePage } from './onEvents/onHomePage';
+export { onUserInput } from './onEvents/onUserInput';
+export { onCronjob } from './onEvents/onCronjob';
+export { onInstall } from './onEvents/onInstall';
 
 /**
  * Handle incoming JSON-RPC requests, sent through `wallet_invokeSnap`.
@@ -51,15 +58,3 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
 
 
 
-import type {
-  OnRpcRequestHandler,
-} from '@metamask/snaps-sdk';
-import { getUtxos } from './node-api/getUtxos';
-import { getLocalUtxos, resetState, saveUtxos } from './utils/utxoDB';
-import { CoinbaseUTXO, PaymentUTXO } from './interfaces';
-
-
-
-export { onHomePage } from './onEvents/onHomePage';
-export { onUserInput } from './onEvents/onUserInput';
-export { onCronjob } from './onEvents/onCronjob';

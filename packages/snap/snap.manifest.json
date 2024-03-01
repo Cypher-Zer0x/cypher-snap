@@ -1,17 +1,17 @@
 {
   "version": "0.1.0",
   "description": "Bring privacy back with @cypher-lab",
-  "proposedName": "Cypher Zer0x",
+  "proposedName": "cypher-zer0x",
   "repository": {
     "type": "git",
-    "url": "https://github.com/MetaMask/template-snap-monorepo.git"
+    "url": "https://github.com/Cypher-Zer0x/cypher-snap.git"
   },
   "source": {
-    "shasum": "LtQY4rPBISV+eNDOp9Kg5I8NL0MKwLlDrZXUQyzG1vE=",
+    "shasum": "s2QfCZEmvO06WRX+gEsEaQNwvl4dWReIJmJIewaqHho=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",
-        "packageName": "snap",
+        "packageName": "cypher-zer0x",
         "registry": "https://registry.npmjs.org/",
         "iconPath": "images/icon.svg"
       }
@@ -22,7 +22,7 @@
     "snap_dialog": {},
     "endowment:rpc": {
       "dapps": true,
-      "snaps": true
+      "snaps": false
     },
     "endowment:network-access": {},
     "snap_getBip44Entropy": [
@@ -41,7 +41,8 @@
           }
         }
       ]
-    }
+    },
+    "endowment:lifecycle-hooks": {}
   },
   "manifestVersion": "0.1"
 }

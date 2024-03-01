@@ -1,8 +1,26 @@
-export{ Curve, CurveName } from '@cypherlab/types-ring-signature';
+export { Curve, CurveName } from './point';
 export { Point } from './point';
 export { maskAmount, unmaskAmount } from "./amountMask";
-export { keccak256 } from "@cypherlab/types-ring-signature/dist/src/utils/hashFunction";
 export { generateRing } from "./generateRing";
+import { keccak_256 } from "@noble/hashes/sha3";
+
+export function keccak256(
+  input: string | bigint[],
+): string {
+  if (typeof input === "string") {
+    return "0x" + uint8ArrayToHex(keccak_256(input));
+  }
+  return (
+    "0x" + uint8ArrayToHex(keccak_256(input.map((x) => x.toString()).join("")))
+  );
+}
+function uint8ArrayToHex(array: Uint8Array): string {
+  let hex = "";
+  for (let i = 0; i < array.length; i++) {
+    hex += ("00" + array[i]!.toString(16)).slice(-2);
+  }
+  return hex;
+}
 /**
  * Convert the smallest unit to readable value of a token
  * 

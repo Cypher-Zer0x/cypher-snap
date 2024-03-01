@@ -1,10 +1,10 @@
 {
-  "name": "snap",
+  "name": "cypher-zer0x",
   "version": "0.1.0",
-  "description": "The 'Hello, world!' of MetaMask Snaps, now written in TypeScript.",
+  "description": "Bring privacy back with @cypher-lab",
   "repository": {
     "type": "git",
-    "url": "https://github.com/MetaMask/template-snap-monorepo.git"
+    "url": "https://github.com/Cypher-Zer0x/cypher-snap.git"
   },
   "license": "(MIT-0 OR Apache-2.0)",
   "main": "./dist/bundle.js",
@@ -28,11 +28,12 @@
     "postinstall": "patch-package"
   },
   "dependencies": {
-    "@cypherlab/types-ring-signature": "../../../../cypher-lab/types-Ring-Signature",
     "@metamask/snaps-sdk": "^2.1.0",
+    "@noble/hashes": "^1.3.3",
     "bigint-crypto-utils": "^3.3.0",
     "buffer": "^6.0.3",
     "bulletproof-js": "^1.0.7",
+    "crypto-browserify": "^3.12.0",
     "elliptic": "^6.5.4"
   },
   "devDependencies": {
