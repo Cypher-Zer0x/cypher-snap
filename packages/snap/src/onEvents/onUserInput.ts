@@ -1,8 +1,8 @@
-import { Component, OnUserInputHandler, UserInputEventType, panel, row, text, button, heading, input } from "@metamask/snaps-sdk";
+import { OnUserInputHandler, UserInputEventType, panel, row, text, button, heading, copyable, image } from "@metamask/snaps-sdk";
 import { homeUi, newTx, sendTxFromExpended, validTx } from "./ui";
-import { createAndBroadcastTx } from "../txs/ringCt/createAndBroadcastTx";
-import { api, isAddressValid } from "../keys";
+import {  isAddressValid, userAddress } from "../keys";
 import { amountFromString } from "../utils/convert-types/stringToAmount";
+import QRCode from "qrcode-svg";
 
 /**
  * Handle incoming user events coming from the MetaMask clients open interfaces.
@@ -13,10 +13,8 @@ import { amountFromString } from "../utils/convert-types/stringToAmount";
  * @see https://docs.metamask.io/snaps/reference/exports/#onuserinput
  */
 export const onUserInput: OnUserInputHandler = async ({ id, event }) => {
-  console.log("event nameee: ", event.name, event.type);
 
   if (event.type === UserInputEventType.ButtonClickEvent) {
-    console.log("BUTTONCLICKEVENT: ");
     switch (event.name) {
       case 'update':
         await newTx(id);
@@ -33,8 +31,39 @@ export const onUserInput: OnUserInputHandler = async ({ id, event }) => {
         break;
 
       case 'send':
-        console.log("SEND");
         await newTx(id);
+        break;
+
+      case 'receive':
+
+        const data = await userAddress();
+        // Create a new QRCode instance
+        const qr = new QRCode({
+          content: data,
+          padding: 4, // Optional, default is 4
+          width: 10, // Optional, default is 256
+          height: 10, // Optional, default is 256
+          color: "#000000", // Optional, default is "#000000"
+          background: "#ffffff", // Optional, default is "#ffffff"
+          ecl: "M", // Error Correction Level: L, M, Q, H
+        });
+
+
+        // Generate SVG QR code
+        const svg = qr.svg();
+        await snap.request({
+          method: 'snap_updateInterface',
+          params: {
+            id,
+            ui: panel([
+              heading('Receive tokens'),
+              text('Your address:'),
+              copyable(await userAddress()),
+              button({ value: 'Home 🏠', name: 'go-home', variant: 'secondary' }),
+              image(svg),
+            ]),
+          },
+        });
         break;
 
       default:
@@ -42,14 +71,10 @@ export const onUserInput: OnUserInputHandler = async ({ id, event }) => {
     }
 
     if (event.name?.startsWith('submit-tx+')) {
-      console.log('CUSTOM EVENT');
       try {
         const data = JSON.parse(event.name.split('+')[1]!);
         const fee = BigInt(data.fee);
-        console.log("feeeeee:" , fee);
-        console.log("datafeeeeee: ", data.amount);
         const e = { value: { 'tx-receiver': data['tx-receiver'], amount: data.amount, fee: fee.toString() } };
-        console.log("eeeeee: ", e.value);
         await snap.request({
           method: 'snap_updateInterface',
           params: {
@@ -68,7 +93,6 @@ export const onUserInput: OnUserInputHandler = async ({ id, event }) => {
     switch (event.name) {
 
       case 'valid-tx':
-        console.log("VALID TX");
         await snap.request({
           method: 'snap_updateInterface',
           params: {
@@ -89,7 +113,6 @@ export const onUserInput: OnUserInputHandler = async ({ id, event }) => {
 
 // check if the event contains all the required parameters
 export function checkSendTxParams(event: any): boolean {
-  console.log("checkSendTxParams event: ", event.value);
   // console.log("event: ", event.value);
   if (!event.value['tx-receiver'] || !event.value['amount'] || !event.value['fee']) {
     console.log("0");

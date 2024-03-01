@@ -1,5 +1,6 @@
 import { OnHomePageHandler } from "@metamask/snaps-sdk";
 import { createInterface } from "./ui";
+import { resetState } from "../utils/utxoDB";
 
 
 /* 

@@ -4,8 +4,7 @@ import { CoinbaseUTXO, PaymentUTXO, SignedPaymentTX } from "../../interfaces";
 import { Point, generateRing, keccak256, unmaskAmount } from "../../utils";
 import { broadcastTx } from "../broadcastTx";
 import { getLocalUtxos, removeUtxos } from "../../utils/utxoDB";
-import { getBalance } from "../../utxos/getBalance";
-import { G, pubKeysFromAddress, userSpendPriv, userViewPriv } from "../../keys";
+import { pubKeysFromAddress, userSpendPriv, userViewPriv } from "../../keys";
 
 // send a tx to the client
 export async function createAndBroadcastTx(api: string, data: { address: string, value: bigint }[], fee: bigint): Promise<string> {
@@ -28,10 +27,6 @@ export async function createAndBroadcastTx(api: string, data: { address: string,
 
   const signedTx = {
     ...unsignedTx,
-    // message: string,
-    // keys: { utxoPrivKeys: bigint[], commitmentKey: bigint },
-    // ring: Point[][],
-    // txContent: { utxoData: { [recipient: string]: { currency: string, value: bigint, decimals: number } }, fee: bigint }
     signature: await signRingCtTX(
       JSON.stringify(unsignedTx),
       {
@@ -45,7 +40,7 @@ export async function createAndBroadcastTx(api: string, data: { address: string,
       }
     )
   } satisfies SignedPaymentTX;
-  // console.log("signed tx:\n", JSON.stringify(signedTx), "\n");
+
   // broadcast the tx
   let txId = "Error";
   let broadcasted = false;
@@ -62,12 +57,9 @@ export async function createAndBroadcastTx(api: string, data: { address: string,
     await removeUtxos(inputs.map((utxo: (PaymentUTXO | CoinbaseUTXO)) => ({ utxo, amount: unmaskAmount(viewPriv, utxo.rG, utxo.amount).toString() })));
   }
 
-  const apres = await getLocalUtxos();
-
   const totalInputsAmount = Object.values(avant).flat().reduce((acc, curr) => acc + unmaskAmount(viewPriv, curr.rG, curr.amount), 0n);
   const totalOutputsAmount = unmaskAmount(11n, outputs[0]![0].rG, outputs[0]![0].amount) + unmaskAmount(await userViewPriv(), outputs[1]![0].rG, outputs[1]![0].amount)
   const totalFee = totalInputsAmount - totalOutputsAmount;//.reduce((acc, curr) => acc + curr, 0n);
-console.log("rrrrrrr\n", Object.values(apres).flat());
   console.log("amount verif: \n",
     totalInputsAmount.toString(), "\n",
     totalOutputsAmount.toString(), "\n",

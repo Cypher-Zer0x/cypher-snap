@@ -18,36 +18,35 @@ export async function setupRingCt(
 
   const totalAmount = outputs.reduce((acc, output) => acc + output.value, 0n);
 
-  await resetState();// todo: remove for prod
-  /* ----------------------------MOCK UTXO---------------------------- */
-  const rMock = randomBigint((new Curve(CurveName.SECP256K1)).N);
-  const value = 153n;
-  const bf = 6154675761567155167161n;
-  const mockedUtxo: PaymentUTXO = {
-    version: "version",
-    transaction_hash: "transaction_hash",
-    output_index: 0,
-    public_key: G.mult(BigInt(keccak256(viewPub.mult(rMock).compress()))).add(spendPub).compress(), // public key of the owner of the utxo
-    amount: maskAmount(viewPub, rMock, value),
-    currency: "ETH", // currency -> TODO: find a way to encrypt it too
-    commitment: G.mult(bf).add(H.mult(value)).compress(),
-    rangeProof: { // todo: fix: getRangeProof(12345n), -> this range proof is useless since the amount is not linked to the commitment. This needs to be fixed
-      V: "string",
-      A: "string",
-      S: "string",
-      T1: "string",
-      T2: "string",
-      tx: "string",
-      txbf: "string",
-      e: "string",
-      a0: "string",
-      b0: "string",
-      ind: [{ L: "string", R: "string" }],
-    } satisfies LightRangeProof,
-    rG: G.mult(rMock).compress(),
-  } satisfies PaymentUTXO;
-  await saveUtxos([mockedUtxo])
-  /* ----------------------------------------------------------------- */
+  // /* ----------------------------MOCK UTXO---------------------------- */
+  // const rMock = randomBigint((new Curve(CurveName.SECP256K1)).N);
+  // const value = 153n;
+  // const bf = 6154675761567155167161n;
+  // const mockedUtxo: PaymentUTXO = {
+  //   version: "version",
+  //   transaction_hash: "transaction_hash",
+  //   output_index: 0,
+  //   public_key: G.mult(BigInt(keccak256(viewPub.mult(rMock).compress()))).add(spendPub).compress(), // public key of the owner of the utxo
+  //   amount: maskAmount(viewPub, rMock, value),
+  //   currency: "ETH", // currency -> TODO: find a way to encrypt it too
+  //   commitment: G.mult(bf).add(H.mult(value)).compress(),
+  //   rangeProof: { // todo: fix: getRangeProof(12345n), -> this range proof is useless since the amount is not linked to the commitment. This needs to be fixed
+  //     V: "string",
+  //     A: "string",
+  //     S: "string",
+  //     T1: "string",
+  //     T2: "string",
+  //     tx: "string",
+  //     txbf: "string",
+  //     e: "string",
+  //     a0: "string",
+  //     b0: "string",
+  //     ind: [{ L: "string", R: "string" }],
+  //   } satisfies LightRangeProof,
+  //   rG: G.mult(rMock).compress(),
+  // } satisfies PaymentUTXO;
+  // await saveUtxos([mockedUtxo])
+  // /* ----------------------------------------------------------------- */
 
 
   // get all the utxos from the metamask storage

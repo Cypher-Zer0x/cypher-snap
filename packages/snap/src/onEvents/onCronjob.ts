@@ -7,8 +7,9 @@ import { getLocalUtxos } from '../utils/utxoDB';
 export const onCronjob: OnCronjobHandler = async ({ request }) => {
   switch (request.method) {
     case 'retrieveUtxos':
+      // console.log('Retrieving new UTXOs...')
       const utxos = await getUtxos("https://api.zer0x.xyz")
-
+      // console.log("FETCHING UTXOS", utxos);
       // save the balance to the local storage
       await saveUtxos(utxos as (PaymentUTXO | CoinbaseUTXO)[]);
 

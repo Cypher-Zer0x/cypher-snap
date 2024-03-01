@@ -1,14 +1,11 @@
 import {
   ButtonType,
-  ManageStateOperation,
   Panel,
-  address,
   button,
   copyable,
   divider,
   form,
   heading,
-  image,
   input,
   panel,
   row,
@@ -20,7 +17,7 @@ import { CoinbaseUTXO, PaymentUTXO, SignedPaymentTX } from '../interfaces';
 import { Point, amountToString, generateRing, keccak256, unmaskAmount } from '../utils';
 import { signRingCtTX } from '../snap-api';
 import { broadcastTx } from '../txs/broadcastTx';
-import { getLocalUtxos, removeUtxos } from '../utils/utxoDB';
+import { getLocalUtxos, removeUtxos, resetState } from '../utils/utxoDB';
 import { checkSendTxParams } from './onUserInput';
 import { amountFromString } from '../utils/convert-types/stringToAmount';
 import { stringFromAmount } from '../utils/convert-types/stringFromAmount';
@@ -38,24 +35,36 @@ export async function createInterface(): Promise<string> {
 }
 
 export async function homeUi() {
+  // await resetState();
   const state = await getLocalUtxos();
   let balance: bigint = 0n;
   for (let amount in state) {
     console.log("amount: ", amount);
     balance += BigInt(amount) * BigInt(state[amount]!.length);
   }
+  console.log("state[amount].length: ", state['10000000000000000']?.length);
+
   const strBalance = stringFromAmount(balance, 18);
+
   return {
     ui: panel([
-      heading(`${strBalance} ETH`),
+      text(`Balance: **${strBalance} ETH**`),
       copyable(await userAddress()),
       button({ value: 'Send', name: 'send' }),
       divider(),
-      button({ value: 'Bridge', name: 'bridge' }),
+      button({ value: 'Receive', name: 'receive' }),
+      divider(),
+      button({ value: '🌉 Bridge 🌉', name: 'bridge' }),
       divider(),
       // todo: display token balances for each token in state
+      row('Z0x', text("4 800.00")),
       row('USDC', text("250.00")),
       row('WBTC', text("0.0024")),
+      button({ value: 'View UTXOs 📜', name: 'view-utxos' }),
+      divider(),
+      button({ value: "visit cypherlab.org 🔗", name: "visit-cypherlab", variant: "secondary" }),
+      button({ value: "Follow on X", name: "follow-x", variant: "secondary" }),
+
     ]),
   }
 }
@@ -84,7 +93,7 @@ export async function newTx(id: string) {
         }),
         divider(),
         row(" ", text(" ")),
-        button({ value: 'Home', name: 'go-home', variant: 'secondary' }),
+        button({ value: 'Home 🏠', name: 'go-home', variant: 'secondary' }),
       ]),
     },
   });
@@ -99,9 +108,6 @@ export async function sendTxFromExpended(id: string, event: any): Promise<{ ui: 
   if (!checkSendTxParams(event)) throw new Error("Invalid parameters");
   const data = [{ address: event.value['tx-receiver']!, value: BigInt(event.value['amount']!) }]
   const fee = BigInt(event.value['fee']!);
-  console.log("fee sendTxFromExpended: ", event.value['fee']);
-  console.log("dataaaaa: ", data);
-
 
   const { unsignedTx, inputs, outputs } = await setupRingCt(data, fee);
 
@@ -164,7 +170,7 @@ export async function sendTxFromExpended(id: string, event: any): Promise<{ ui: 
       text('With a fee of:'),
       copyable(amountToString(fee, 18) + " ETH"),
       divider(),
-      button({ value: 'Home', name: 'go-home', variant: 'secondary' }),
+      button({ value: 'Home 🏠', name: 'go-home', variant: 'secondary' }),
     ]),
   }
 }
@@ -177,10 +183,8 @@ export async function sendTxFromExpended(id: string, event: any): Promise<{ ui: 
  * @param id -  The interface ID to update.
  */
 export async function validTx(id: string, event: any): Promise<{ ui: Panel }> {
-  console.log("BEFORE TEST");
   if (!checkSendTxParams(event)) throw new Error("Invalid parameters");
-  console.log("TEST OK");
-  console.log("ventouse: ", event);
+
   const data = { address: event.value['tx-receiver']!, value: event.value['amount']! };
   const fee = event.value['fee']!;
 
@@ -193,17 +197,7 @@ export async function validTx(id: string, event: any): Promise<{ ui: Panel }> {
       copyable(data.address),
       text('With a fee of:'),
       copyable(fee.toString() + " ETH"),
-      // form({
-      //   name: 'example-form',
-      //   children: [
-      //     input({
-      //       name: 'example-input',
-      //       placeholder: 'Enter something...',
-      //     }),
-      //     button('Submit', ButtonType.Submit, 'sumbit'),
-      //   ],
-      // }),
-      button({ value: 'Sign', name: 'submit-tx+' + JSON.stringify({ 'tx-receiver': event.value['tx-receiver']!, amount: amountFromString(event.value['amount']!, 18).toString(), fee: amountFromString(fee, 18).toString() }), variant: 'primary' }),
+      button({ value: 'Sign 🚀', name: 'submit-tx+' + JSON.stringify({ 'tx-receiver': event.value['tx-receiver']!, amount: amountFromString(event.value['amount']!, 18).toString(), fee: amountFromString(fee, 18).toString() }), variant: 'primary' }),
       button({ value: 'Cancel', name: 'go-home', variant: 'secondary' }),
     ]),
   }

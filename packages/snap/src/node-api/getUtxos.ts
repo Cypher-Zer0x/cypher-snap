@@ -9,8 +9,25 @@ import { UTXO } from "../interfaces";
 export async function getUtxos(api: string): Promise<UTXO[]> {
 
   const utxoSet = await fetch(`${api}/utxo/set`).then((res) => res.json());
+  console.log("API: ", `${api}/utxo/set`);
 
-  return utxoSet.map((utxo: UTXO) => utxo);
+  let utxos: UTXO[] = [];
+  // list the keys
+  for (let key in utxoSet) {
+    utxos = utxos.concat(utxoSet[key]);
+  }
+
+  return utxos.map((utxo: any) => {
+    if (utxo.Payment) {
+      return utxo.Payment;
+    }
+    if (utxo.Coinbase) {
+      return utxo.Coinbase;
+    } else if (utxo.Exit) {
+      return utxo.Exit;
+    }
+    console.warn("Unknown utxo type: ", utxo, '\nIgnoring it');
+  });
 }
 
-// getUtxos("http://176.146.201.74:8000").then(console.log);
+// getUtxos("https://api.zer0x.xyz").then(console.log);

@@ -2,10 +2,10 @@ import { CoinbaseUTXO, PaymentUTXO, UtxoStorage } from "../interfaces";
 import { Json } from "@metamask/snaps-sdk";
 import { unmaskAmount } from "./amountMask";
 import { userViewPriv } from "../keys";
+import { isCoinbaseUTXO } from "../utxos";
 
 
 export async function saveUtxos(utxos: (PaymentUTXO | CoinbaseUTXO)[]): Promise<void> {
-
   // get state
   let state: UtxoStorage = await snap.request({
     method: 'snap_manageState',
@@ -16,16 +16,23 @@ export async function saveUtxos(utxos: (PaymentUTXO | CoinbaseUTXO)[]): Promise<
 
   // add the utxos
   for (let i = 0; i < utxos.length; i++) {
-    // todo: replace by the actual signer pubkey
-    const clearAmount = unmaskAmount(await userViewPriv(), utxos[i]!.rG, utxos[i]!.amount).toString();
-
+    let clearAmount: string = String(utxos[i]!.amount);
+    // if utxo is coinbase, amount is clear
+    if (!isCoinbaseUTXO(utxos[i]!)) {
+      clearAmount = unmaskAmount(await userViewPriv(), utxos[i]!.rG, utxos[i]!.amount).toString();
+    }
     // Check if `state` is initialized and if `clearAmount` key exists or is null
     if (state[clearAmount] === undefined || state[clearAmount] === null) {
       state[clearAmount] = JSON.stringify([]);
     }
-    // Add the utxo to the state
-    state[clearAmount] = JSON.stringify([...JSON.parse(state[clearAmount]!), utxos[i]]);
+    // if no element of state[clearAmount] has the same public key as utxos[i], add the utxo to the state
+    // state[clearAmount] = JSON.stringify([...JSON.parse(state[clearAmount]!), utxos[i]]);
+    // if no element of state[clearAmount] has the same public key as utxos[i], add the utxo to the state
+    if (!JSON.parse(state[clearAmount]!).some((u: PaymentUTXO | CoinbaseUTXO) => u.public_key === utxos[i]!.public_key)) {
+      state[clearAmount] = JSON.stringify([...JSON.parse(state[clearAmount]!), utxos[i]!]);
+    }
   }
+
   // save state
   await snap.request({
     method: 'snap_manageState',
@@ -83,6 +90,6 @@ export async function resetState(): Promise<void> {
   // save state
   await snap.request({
     method: 'snap_manageState',
-    params: { operation: 'update', newState: {} },
+    params: { operation: 'update', newState: {} as Record<string, Json> },
   });
 }
