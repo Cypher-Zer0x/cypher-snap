@@ -11,8 +11,6 @@ export function stringFromAmount(amount: BigInt, decimals: number): string {
   const str = amount.toString();
 
   if (str.length <= decimals) {
-    console.log("RR");
-    console.log(decimals - str.length);
     return `0.${str.padStart(decimals, '0')}`.replace(/\.?0+$/, "");
   }
   const int = str.slice(0, str.length - decimals);

@@ -39,10 +39,8 @@ export async function homeUi() {
   const state = await getLocalUtxos();
   let balance: bigint = 0n;
   for (let amount in state) {
-    console.log("amount: ", amount);
     balance += BigInt(amount) * BigInt(state[amount]!.length);
   }
-  console.log("state[amount].length: ", state['10000000000000000']?.length);
 
   const strBalance = stringFromAmount(balance, 18);
 
@@ -63,8 +61,7 @@ export async function homeUi() {
       button({ value: 'View UTXOs 📜', name: 'view-utxos' }),
       divider(),
       button({ value: "visit cypherlab.org 🔗", name: "visit-cypherlab", variant: "secondary" }),
-      button({ value: "Follow on X", name: "follow-x", variant: "secondary" }),
-
+      // button({ value: "Follow on X", name: "follow-x", variant: "secondary" }),
     ]),
   }
 }
@@ -122,7 +119,7 @@ export async function sendTxFromExpended(id: string, event: any): Promise<{ ui: 
     return BigInt(keccak256("commitment mask" + keccak256(Point.decompress(utxo.rG).mult(viewPriv).compress()) + index.toString()));
   }).reduce((acc, curr) => acc + curr, 0n);
 
-  const ring = await generateRing();
+  const ring = await generateRing(BigInt(outputs.length) + 1n);
 
   const signedTx = {
     ...unsignedTx,
@@ -202,4 +199,51 @@ export async function validTx(id: string, event: any): Promise<{ ui: Panel }> {
     ]),
   }
 
+}
+
+
+export async function displayUtxos() {
+  const state = await getLocalUtxos();
+  console.log("state: ", state);
+
+  // order utxos by amount
+  let utxos: { amount: string, utxos: (PaymentUTXO | CoinbaseUTXO)[] }[] = [];
+  let balance: bigint = 0n;
+  for (let amount in state) {
+    utxos.push({ amount, utxos: state[amount]! });
+    balance += BigInt(amount) * BigInt(state[amount]!.length);
+
+  }
+  utxos = utxos.sort((a, b) => BigInt(a.amount) < BigInt(b.amount) ? -1 : 1);
+
+  const strBalance = stringFromAmount(balance, 18);
+  // display utxos
+  let toDisplay: any = []
+  for (let i = 0; i < utxos.length; i++) {
+    toDisplay.push(
+      ...utxos[i]!.utxos.map((utxo, index) => {
+        return panel([
+          text(`UTXO ${index + 1}`),
+          text(`Version: ${utxo.version}`),
+          text(`Amount: ${stringFromAmount(BigInt(utxos[i]!.amount), 18)} ETH`),
+          text(`Public Key: ${utxo.public_key}`),
+          text(`Currency: ${utxo.currency}`),
+          text(`Transaction hash: ${utxo.transaction_hash}`),
+          text(`Output index: ${utxo.output_index}`),
+          divider(),
+        ]);
+      })
+    );
+  }
+
+  return {
+    ui: panel([
+      heading('Your UTXOs'),
+      text(`Balance: **${strBalance} ETH**`),
+      button({ value: 'Home 🏠', name: 'go-home', variant: 'secondary' }),
+      divider(),
+      ...toDisplay,
+      button({ value: 'Home 🏠', name: 'go-home', variant: 'secondary' }),
+    ])
+  }
 }

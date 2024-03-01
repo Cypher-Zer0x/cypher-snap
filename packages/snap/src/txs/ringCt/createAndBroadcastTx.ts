@@ -23,7 +23,7 @@ export async function createAndBroadcastTx(api: string, data: { address: string,
     return BigInt(keccak256("commitment mask" + keccak256(Point.decompress(utxo.rG).mult(viewPriv).compress()) + index.toString()));
   }).reduce((acc, curr) => acc + curr, 0n);
 
-  const ring = await generateRing();
+  const ring = await generateRing(BigInt(outputs.length));
 
   const signedTx = {
     ...unsignedTx,

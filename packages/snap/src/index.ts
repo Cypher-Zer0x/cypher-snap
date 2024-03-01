@@ -20,24 +20,25 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
   switch (request.method) {
     case 'hello':
 
-      // const data = [
-      //   {
-      //     address: await addressFromPubKeys(G.mult(12n).compress(), G.mult(11n).compress()),
-      //     value: 100n
-      //   }
-      // ];
+      const data = [
+        {
+          address: await addressFromPubKeys(G.mult(12n).compress(), G.mult(11n).compress()),
+          value: 100n
+        }
+      ];
 
-      // const fee = 10n;
+      const fee = 10n;
 
-      // return await createAndBroadcastTx(api, data, fee)
-      // return JSON.stringify(await getUtxos(api));
-      console.log('Retrieving new UTXOs...')
-      const utxos = await getUtxos("https://api.zer0x.xyz")
-      console.log("FETCHING UTXOS", utxos);
-      // save the balance to the local storage
-      await saveUtxos(utxos as (PaymentUTXO | CoinbaseUTXO)[]);
+      // // return await createAndBroadcastTx(api, data, fee)
+      // // return JSON.stringify(await getUtxos(api));
+      // console.log('Retrieving new UTXOs...')
+      // const utxos = await getUtxos("https://api.zer0x.xyz")
+      // console.log("FETCHING UTXOS", utxos);
+      // // save the balance to the local storage
+      // await saveUtxos(utxos as (PaymentUTXO | CoinbaseUTXO)[]);
 
-      console.log('Utxos retrieved and saved to local storage:\n', await getLocalUtxos());
+      // console.log('Utxos retrieved and saved to local storage:\n', await getLocalUtxos());
+      return await createAndBroadcastTx(api, data, fee);
 
     default:
       throw new Error('Method not found.');

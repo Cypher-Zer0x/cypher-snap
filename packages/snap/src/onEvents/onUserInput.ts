@@ -1,6 +1,6 @@
 import { OnUserInputHandler, UserInputEventType, panel, row, text, button, heading, copyable, image } from "@metamask/snaps-sdk";
-import { homeUi, newTx, sendTxFromExpended, validTx } from "./ui";
-import {  isAddressValid, userAddress } from "../keys";
+import { displayUtxos, homeUi, newTx, sendTxFromExpended, validTx } from "./ui";
+import { isAddressValid, userAddress } from "../keys";
 import { amountFromString } from "../utils/convert-types/stringToAmount";
 import QRCode from "qrcode-svg";
 
@@ -62,6 +62,16 @@ export const onUserInput: OnUserInputHandler = async ({ id, event }) => {
               button({ value: 'Home 🏠', name: 'go-home', variant: 'secondary' }),
               image(svg),
             ]),
+          },
+        });
+        break;
+
+      case "view-utxos":
+        await snap.request({
+          method: 'snap_updateInterface',
+          params: {
+            id,
+            ui: (await displayUtxos()).ui,
           },
         });
         break;
