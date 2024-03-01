@@ -16,7 +16,7 @@ export async function getUtxos(api: string): Promise<UTXO[]> {
   for (let key in utxoSet) {
     utxos = utxos.concat(utxoSet[key]);
   }
-
+  // console.log(JSON.stringify(utxos, null, 2));
   return utxos.map((utxo: any) => {
     if (utxo.Payment) {
       return utxo.Payment;

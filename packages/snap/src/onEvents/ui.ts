@@ -108,19 +108,20 @@ export async function sendTxFromExpended(id: string, event: any): Promise<{ ui: 
 
   const { unsignedTx, inputs, outputs } = await setupRingCt(data, fee);
 
-
+  console.log("avant signedTx-ui-sendtxfromexpended");
   // get the blinding factors and sum them
   const viewPriv = await userViewPriv();
   const spendPriv = await userSpendPriv();
+  console.log("inputs.length: ", inputs.length);
   const inputsCommitmentsPrivateKey = inputs.map((utxo: (PaymentUTXO | CoinbaseUTXO), index) => {
     if (utxo.currency !== "ETH") throw new Error("currency not supported");
-
+    console.log("inputUtxo: ", utxo, "\n", "rG:", utxo.rG);
     // get the blinding factor from input utxo
     return BigInt(keccak256("commitment mask" + keccak256(Point.decompress(utxo.rG).mult(viewPriv).compress()) + index.toString()));
   }).reduce((acc, curr) => acc + curr, 0n);
 
   const ring = await generateRing(BigInt(outputs.length));
-
+  console.log("avant signedTx. ring:\n", ring);
   const signedTx = {
     ...unsignedTx,
     signature: await signRingCtTX(
@@ -137,7 +138,7 @@ export async function sendTxFromExpended(id: string, event: any): Promise<{ ui: 
       true
     )
   } satisfies SignedPaymentTX;
-  // console.log("signed tx:\n", JSON.stringify(signedTx), "\n");
+  console.log("signed tx");
   // broadcast the tx
   let txId = "Error";
   let broadcasted = false;
@@ -154,6 +155,7 @@ export async function sendTxFromExpended(id: string, event: any): Promise<{ ui: 
     await removeUtxos(inputs.map((utxo: (PaymentUTXO | CoinbaseUTXO)) => ({ utxo, amount: unmaskAmount(viewPriv, utxo.rG, utxo.amount).toString() })));
   }
 
+  console.log("bleu56: ", data[0]!.value, " ", fee, '\n::' + amountToString(data[0]!.value, 18));
   return {
     ui: panel([
       heading('Tokens sent'),

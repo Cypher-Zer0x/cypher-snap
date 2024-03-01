@@ -16,7 +16,7 @@ export function amountToString(amount: bigint, decimals: number): string {
   const strAmount = amount.toString();
 
   if (strAmount.length <= decimals) {
-    return `0.${strAmount.padStart(decimals - strAmount.length, '0')}`.replace(/\.?0+$/, "");
+    return `0.${strAmount.padStart(decimals, '0')}`.replace(/\.?0+$/, "");
   }
 
   const xrp = strAmount.slice(0, strAmount.length - decimals);

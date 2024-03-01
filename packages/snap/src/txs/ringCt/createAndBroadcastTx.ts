@@ -12,17 +12,18 @@ export async function createAndBroadcastTx(api: string, data: { address: string,
   const { unsignedTx, inputs, outputs } = await setupRingCt(data, fee);
 
   const avant = await getLocalUtxos();
-
+  console.log("avant0");
   // get the blinding factors and sum them
   const viewPriv = await userViewPriv();
   const spendPriv = await userSpendPriv();
+  console.log("avant");
   const inputsCommitmentsPrivateKey = inputs.map((utxo: (PaymentUTXO | CoinbaseUTXO), index) => {
     if (utxo.currency !== "ETH") throw new Error("currency not supported");
 
     // get the blinding factor from input utxo
     return BigInt(keccak256("commitment mask" + keccak256(Point.decompress(utxo.rG).mult(viewPriv).compress()) + index.toString()));
   }).reduce((acc, curr) => acc + curr, 0n);
-
+  console.log("avant2");
   const ring = await generateRing(BigInt(outputs.length));
 
   const signedTx = {
@@ -40,7 +41,7 @@ export async function createAndBroadcastTx(api: string, data: { address: string,
       }
     )
   } satisfies SignedPaymentTX;
-
+  console.log("post-signedTx");
   // broadcast the tx
   let txId = "Error";
   let broadcasted = false;

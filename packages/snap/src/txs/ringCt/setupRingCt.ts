@@ -149,14 +149,14 @@ export async function setupRingCt(
 
     blindingFactors.push(bf);
   }
-
+  console.log("avant tx");
   // generate the tx
   const tx: UnsignedPaymentTX = {
     inputs: selectedUtxos.map(utxo => (keccak256(JSON.stringify(utxo)))),
     outputs: outputUtxos.map(utxo => (keccak256(JSON.stringify(utxo)))),
     fee: '0x' + fee.toString(16),
   } satisfies UnsignedPaymentTX;
-
+  console.log("avant tx2");
   // todo: mix outputs order to avoid always having the change output at the end of the tx
 
   // return the tx
