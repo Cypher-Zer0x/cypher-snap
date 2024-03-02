@@ -10,6 +10,7 @@ import {
   panel,
   row,
   text,
+  spinner,
 } from '@metamask/snaps-sdk';
 import { api, pubKeysFromAddress, userAddress, userSpendPriv, userViewPriv } from "../keys";
 import { setupRingCt } from '../txs/ringCt/setupRingCt';
@@ -17,7 +18,7 @@ import { CoinbaseUTXO, PaymentUTXO, SignedPaymentTX } from '../interfaces';
 import { Point, amountToString, generateRing, keccak256, unmaskAmount } from '../utils';
 import { signRingCtTX } from '../snap-api';
 import { broadcastTx } from '../txs/broadcastTx';
-import { getLocalUtxos, removeUtxos, resetState } from '../utils/utxoDB';
+import { getLocalUtxos, removeUtxos } from '../utils/utxoDB';
 import { checkSendTxParams } from './onUserInput';
 import { amountFromString } from '../utils/convert-types/stringToAmount';
 import { stringFromAmount } from '../utils/convert-types/stringFromAmount';
@@ -37,7 +38,7 @@ export async function createInterface(): Promise<string> {
 
 export async function homeUi() {
   // await resetState();
-  await getUtxos("https://api.zer0x.xyz")
+  await getUtxos(api)
   const state = await getLocalUtxos();
   let balance: bigint = 0n;
   for (let amount in state) {
@@ -143,7 +144,6 @@ export async function sendTxFromExpended(id: string, event: any): Promise<{ ui: 
       true
     )
   } satisfies SignedPaymentTX;
-  // console.log("signed tx");
   // broadcast the tx
   let txId = "Error";
   let broadcasted = false;

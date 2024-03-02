@@ -7,7 +7,7 @@
     "url": "https://github.com/Cypher-Zer0x/cypher-snap.git"
   },
   "source": {
-    "shasum": "wx2ubpNCM5O/eiGnhR5fH3TN0LrqTrKGHJizBAEShYM=",
+    "shasum": "FdkNHyz8jbKp1iMUhNxpuLxrB/9GUN75ehPfMKwD8KQ=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",
@@ -42,7 +42,8 @@
         }
       ]
     },
-    "endowment:lifecycle-hooks": {}
+    "endowment:lifecycle-hooks": {},
+    "endowment:transaction-insight": {}
   },
   "manifestVersion": "0.1"
 }

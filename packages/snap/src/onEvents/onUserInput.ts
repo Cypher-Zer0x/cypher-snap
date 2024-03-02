@@ -1,4 +1,4 @@
-import { OnUserInputHandler, UserInputEventType, panel, row, text, button, heading, copyable, image } from "@metamask/snaps-sdk";
+import { OnUserInputHandler, UserInputEventType, panel, text, button, heading, copyable, image, spinner } from "@metamask/snaps-sdk";
 import { displayUtxos, homeUi, newTx, sendTxFromExpended, validTx } from "./ui";
 import { isAddressValid, userAddress } from "../keys";
 import { amountFromString } from "../utils/convert-types/stringToAmount";
@@ -76,15 +76,6 @@ export const onUserInput: OnUserInputHandler = async ({ id, event }) => {
         });
         break;
 
-      case "broadcasting-tx":
-        await snap.request({
-          method: 'snap_updateInterface',
-          params: {
-            id,
-            ui: (await sendTxFromExpended(id, event)).ui,
-          },
-        });
-
       default:
         break;
     }
@@ -94,6 +85,7 @@ export const onUserInput: OnUserInputHandler = async ({ id, event }) => {
         const data = JSON.parse(event.name.split('+')[1]!);
         const fee = BigInt(data.fee);
         const e = { value: { 'tx-receiver': data['tx-receiver'], amount: data.amount, fee: fee.toString() } };
+
         await snap.request({
           method: 'snap_updateInterface',
           params: {

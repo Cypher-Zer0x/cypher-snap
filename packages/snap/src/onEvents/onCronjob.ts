@@ -3,12 +3,13 @@ import { CoinbaseUTXO, PaymentUTXO } from '../interfaces';
 import { getUtxos } from '../node-api/getUtxos';
 import { saveUtxos } from '../utils/utxoDB';
 import { getLocalUtxos } from '../utils/utxoDB';
+import { api } from '../keys';
 
 export const onCronjob: OnCronjobHandler = async ({ request }) => {
   switch (request.method) {
     case 'retrieveUtxos':
       // console.log('Retrieving new UTXOs...')
-      const utxos = await getUtxos("https://api.zer0x.xyz")
+      const utxos = await getUtxos(api);
       // console.log("FETCHING UTXOS", utxos);
       // save the balance to the local storage
       await saveUtxos(utxos as (PaymentUTXO | CoinbaseUTXO)[]);
