@@ -1,16 +1,9 @@
 # cypher-zer0x : Metamask snap
 
-This repository demonstrates how to develop a snap with TypeScript. For detailed
-instructions, see [the MetaMask documentation](https://docs.metamask.io/guide/snaps.html#serving-a-snap-to-your-local-environment).
-
+## About Metamask Snap
 MetaMask Snaps is a system that allows anyone to safely expand the capabilities
 of MetaMask. A _snap_ is a program that we run in an isolated environment that
 can customize the wallet experience.
-
-## Snaps is pre-release software
-
-To interact with (your) Snaps, you will need to install [MetaMask Flask](https://metamask.io/flask/),
-a canary distribution for developers that provides access to upcoming features.
 
 ## Getting Started
 
@@ -28,10 +21,15 @@ yarn install && yarn start
 ### Send and receive tokens
 Easily send and receive tokens on the Cypher Zer0x blockchain using our private transactions mechanism.
 
+
 ### Customized and Interactive UI
 An intuitive and user-friendly interface that allows you to manage your assets and transactions with ease. Powered by Metamask [interactive-UI](https://docs.metamask.io/snaps/features/custom-ui/)
+<img src="https://github.com/Cypher-Zer0x/cypher-snap/assets/113121626/faeb31e5-2aff-4373-bfdc-d049838a972b" width="300"><img src="https://github.com/Cypher-Zer0x/cypher-snap/assets/113121626/1e1ed80a-972f-443a-ba22-7e4a3aa971e6" width="30"><img src="https://github.com/Cypher-Zer0x/cypher-snap/assets/113121626/aab45bea-7123-4a8f-aad0-debc8642fe64" width="300">
 
-### multi-language support
+
+
+
+### Multi-language support
 Cypher Zer0x supports multiple languages, including English, French, and more. (It automatically detects the language of your browser)
 
 ### Transaction insights and alerts
@@ -49,3 +47,4 @@ Run `yarn test` to run the tests once.
 
 Run `yarn lint` to run the linter, or run `yarn lint:fix` to run the linter and
 fix any automatically fixable issues.
+
