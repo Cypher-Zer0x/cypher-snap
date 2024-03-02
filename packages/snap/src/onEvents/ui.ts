@@ -302,40 +302,43 @@ export async function displayUtxos() {
   utxos = utxos.sort((a, b) => BigInt(a.amount) < BigInt(b.amount) ? -1 : 1);
 
   const strBalance = stringFromAmount(balance, 18);
+  console.log("0");
   // display utxos
-  let toDisplay: any = []
+  let toDisplay: any[] = []
   for (let i = 0; i < utxos.length; i++) {
     toDisplay.push(
-      ...utxos[i]!.utxos.map(async (utxo, index) => {
-        switch (await locale()) {
-          case 'fr':
-            return panel([
-              text(`UTXO ${index + 1}`),
-              text(`Version: ${utxo.version}`),
-              text(`Montant: ${stringFromAmount(BigInt(utxos[i]!.amount), 18)} ETH`),
-              text(`Clé publique: ${utxo.public_key}`),
-              text(`Devise: ${utxo.currency}`),
-              text(`Hash de transaction: ${utxo.transaction_hash}`),
-              text(`Index de sortie: ${utxo.output_index}`),
-              divider(),
-            ]);
+      await Promise.all(
+        utxos[i]!.utxos.map(async (utxo, index) => {
+          switch (await locale()) {
+            case 'fr':
+              return panel([
+                text(`UTXO ${index + 1}`),
+                text(`Version: ${utxo.version}`),
+                text(`Montant: ${stringFromAmount(BigInt(utxos[i]!.amount), 18)} ETH`),
+                text(`Clé publique: ${utxo.public_key}`),
+                text(`Devise: ${utxo.currency}`),
+                text(`Hash de transaction: ${utxo.transaction_hash}`),
+                text(`Index de sortie: ${utxo.output_index}`),
+                divider(),
+              ]);
 
-          default:
-            return panel([
-              text(`UTXO ${index + 1}`),
-              text(`Version: ${utxo.version}`),
-              text(`Amount: ${stringFromAmount(BigInt(utxos[i]!.amount), 18)} ETH`),
-              text(`Public Key: ${utxo.public_key}`),
-              text(`Currency: ${utxo.currency}`),
-              text(`Transaction hash: ${utxo.transaction_hash}`),
-              text(`Output index: ${utxo.output_index}`),
-              divider(),
-            ]);
-        }
-      })
+            default:
+              return panel([
+                text(`UTXO ${index + 1}`),
+                text(`Version: ${utxo.version}`),
+                text(`Amount: ${stringFromAmount(BigInt(utxos[i]!.amount), 18)} ETH`),
+                text(`Public Key: ${utxo.public_key}`),
+                text(`Currency: ${utxo.currency}`),
+                text(`Transaction hash: ${utxo.transaction_hash}`),
+                text(`Output index: ${utxo.output_index}`),
+                divider(),
+              ]);
+          }
+        }))
     );
   }
-
+  console.log("1");
+  console.log(toDisplay);
   switch (await locale()) {
     case 'fr':
       return {
@@ -344,9 +347,9 @@ export async function displayUtxos() {
           text(`Solde: **${strBalance} ETH**`),
           button({ value: 'Accueil 🏠', name: 'go-home', variant: 'secondary' }),
           divider(),
-          ...toDisplay,
+          ...(toDisplay.flat()),
           button({ value: 'Accueil 🏠', name: 'go-home', variant: 'secondary' }),
-        ])
+        ]),
       }
     default:
       return {
@@ -355,9 +358,9 @@ export async function displayUtxos() {
           text(`Balance: **${strBalance} ETH**`),
           button({ value: 'Home 🏠', name: 'go-home', variant: 'secondary' }),
           divider(),
-          ...toDisplay,
+          ...(toDisplay.flat()),
           button({ value: 'Home 🏠', name: 'go-home', variant: 'secondary' }),
-        ])
+        ]),
       }
   }
 }
