@@ -23,6 +23,7 @@ Easily send and receive tokens on the Cypher Zer0x blockchain using our private 
 
 ### Customized and Interactive UI
 An intuitive and user-friendly interface that allows you to manage your assets and transactions with ease. Powered by Metamask [interactive-UI](https://docs.metamask.io/snaps/features/custom-ui/)
+
 <img src="https://github.com/Cypher-Zer0x/cypher-snap/assets/113121626/fd8ea127-c0a4-4230-a568-54dd1a04cb46" width="900">
 
 ### Multi-language support
