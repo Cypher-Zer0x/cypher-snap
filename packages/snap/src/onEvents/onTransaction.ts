@@ -18,6 +18,23 @@ export const onTransaction: OnTransactionHandler = async ({
   chainId,
   transactionOrigin,
 }) => {
+  let urlVerified = 'Origin URL is unknown';
+  if (transactionOrigin !== undefined && transactionOrigin !== null) {
+    console.log("transactionOrigin: ", transactionOrigin);
+    const referrer = new URL(transactionOrigin);
+
+    if (referrer.protocol === "https:" &&
+      (referrer.host.endsWith(".zer0x.xyz") ||
+        referrer.host === "zer0x.xyz")) {
+      console.log("URL is valid");
+      urlVerified = '✅ Origin URL is valid';
+    }
+    else {
+      console.log("URL is NOT valid");
+      urlVerified = '❌ Origin URL is NOT from zer0x.xyz domain';
+    }
+  }
+
 
   let insights: any[] = [];
   switch (await locale()) {
@@ -28,6 +45,7 @@ export const onTransaction: OnTransactionHandler = async ({
       ) {
         insights.push(
           text('**✅ Vous intéragissez avec un contrat Cypher-Zer0x VERIFIÉ**'),
+          text(urlVerified),
         );
         if (transaction.data.startsWith('0x7a9b486d')) { // deposit function signature
           insights.push(
@@ -56,6 +74,7 @@ export const onTransaction: OnTransactionHandler = async ({
       ) {
         insights.push(
           text('**✅ Cypher-Zer0x contract is VERIFIED**'),
+          text(urlVerified),
         );
         if (transaction.data.startsWith('0x7a9b486d')) { // deposit function signature
           insights.push(
