@@ -74,7 +74,16 @@ export const onUserInput: OnUserInputHandler = async ({ id, event }) => {
             ui: (await displayUtxos()).ui,
           },
         });
-        break;        
+        break;
+
+      case "broadcasting-tx":
+        await snap.request({
+          method: 'snap_updateInterface',
+          params: {
+            id,
+            ui: (await sendTxFromExpended(id, event)).ui,
+          },
+        });
 
       default:
         break;

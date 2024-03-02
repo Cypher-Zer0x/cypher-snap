@@ -1,5 +1,5 @@
 {
-  "version": "0.1.0",
+  "version": "0.1.3",
   "description": "Bring privacy back with @cypher-lab",
   "proposedName": "cypher-zer0x",
   "repository": {
@@ -7,7 +7,7 @@
     "url": "https://github.com/Cypher-Zer0x/cypher-snap.git"
   },
   "source": {
-    "shasum": "s2QfCZEmvO06WRX+gEsEaQNwvl4dWReIJmJIewaqHho=",
+    "shasum": "wx2ubpNCM5O/eiGnhR5fH3TN0LrqTrKGHJizBAEShYM=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",
@@ -22,7 +22,7 @@
     "snap_dialog": {},
     "endowment:rpc": {
       "dapps": true,
-      "snaps": false
+      "snaps": true
     },
     "endowment:network-access": {},
     "snap_getBip44Entropy": [

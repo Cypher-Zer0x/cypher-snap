@@ -1,6 +1,6 @@
 {
   "name": "cypher-zer0x",
-  "version": "0.1.0",
+  "version": "0.1.3",
   "description": "Bring privacy back with @cypher-lab",
   "repository": {
     "type": "git",
@@ -10,6 +10,7 @@
   "main": "./dist/bundle.js",
   "files": [
     "dist/",
+    "images/",
     "snap.manifest.json"
   ],
   "scripts": {

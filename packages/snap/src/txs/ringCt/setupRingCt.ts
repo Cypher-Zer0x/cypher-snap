@@ -13,7 +13,6 @@ export async function setupRingCt(
   fee: bigint
 ): Promise<{ unsignedTx: UnsignedPaymentTX, inputs: (PaymentUTXO | CoinbaseUTXO)[], outputs: [PaymentUTXO, bigint][] }> {
   const viewPub = Point.decompress(await userViewPub());
-  const spendPub = Point.decompress(await userSpendPub());
 
   const totalAmount = outputs.reduce((acc, output) => acc + output.value, 0n);
 
@@ -72,6 +71,7 @@ export async function setupRingCt(
   // generate the new utxos
   const blindingFactors: bigint[] = [];
   let totalSent = 0n;
+  const txHash = keccak256(JSON.stringify(selectedUtxos));
   const outputUtxos: PaymentUTXO[] = await Promise.all(outputs.map(async (output, index) => {
     const recipientsPubKeys = await pubKeysFromAddress(output.address);
     const recipientViewPub = Point.decompress(recipientsPubKeys.viewPub);
@@ -90,7 +90,7 @@ export async function setupRingCt(
 
     return {
       version: "0x00",
-      transaction_hash: "transaction_hash",
+      transaction_hash: txHash,
       output_index: index,
       public_key: receiverPubKey, // public key of the owner of the utxo
       amount: maskAmount(recipientViewPub, r, output.value), // encrypted amount + blinding factor, only the owner can decrypt it (if coinbase, the amount is clear and there is no blinding factor)
