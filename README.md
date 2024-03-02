@@ -34,7 +34,7 @@ Here is what the UI looks like in french:
 ### Transaction insights and alerts
 Get real-time insights into your transactions and receive alerts for any suspicious activity regarding our Plasma contracts
 
-<img width="300" alt="Capture_decran_2024-03-01_a_22 38 03" src="https://github.com/Cypher-Zer0x/cypher-snap/assets/113121626/6203dc9d-6e5e-4b3f-8e94-5416a7e7cfd4"><img src="https://github.com/Cypher-Zer0x/cypher-snap/assets/113121626/1e1ed80a-972f-443a-ba22-7e4a3aa971e6" width="30"><img width="300" alt="Capture_decran_2024-03-01_a_22 38 03" src="https://github.com/Cypher-Zer0x/cypher-snap/assets/113121626/8326f0a1-09c0-47ff-9cb3-f655a5a61b5d">
+<img width="300" alt="Capture_decran_2024-03-01_a_22 38 03" src="https://github.com/Cypher-Zer0x/cypher-snap/assets/113121626/6203dc9d-6e5e-4b3f-8e94-5416a7e7cfd4"><img src="https://github.com/Cypher-Zer0x/cypher-snap/assets/113121626/1e1ed80a-972f-443a-ba22-7e4a3aa971e6" width="30"><img width="315" alt="Capture_decran_2024-03-01_a_22 38 03" src="https://github.com/Cypher-Zer0x/cypher-snap/assets/113121626/8326f0a1-09c0-47ff-9cb3-f655a5a61b5d">
 
 
 ### Bridge with 8+ supported networks
