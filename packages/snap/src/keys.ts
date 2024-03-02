@@ -1,6 +1,9 @@
 import { Curve, CurveName } from "./utils";
 import { keccak256 } from "./utils";
 
+
+export const locale = (async () => await snap.request({ method: 'snap_getLocale' }));
+
 export const api = "https://api.zer0x.xyz";
 
 export const G = (new Curve(CurveName.SECP256K1)).GtoPoint();
@@ -48,7 +51,7 @@ const addrPrefix = "cz:";
 const addrLength = addrPrefix.length + 2 * 66; // 33 bytes for each pub key (1 parity byte + 32 bytes for the coordinate)
 
 export const addressFromPubKeys = async (spendPub: string, viewPub: string) => {
-  return  addrPrefix + spendPub + viewPub;
+  return addrPrefix + spendPub + viewPub;
 }
 
 export const pubKeysFromAddress = async (address: string) => {

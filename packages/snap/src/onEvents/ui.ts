@@ -10,9 +10,8 @@ import {
   panel,
   row,
   text,
-  spinner,
 } from '@metamask/snaps-sdk';
-import { api, pubKeysFromAddress, userAddress, userSpendPriv, userViewPriv } from "../keys";
+import { api, locale, pubKeysFromAddress, userAddress, userSpendPriv, userViewPriv } from "../keys";
 import { setupRingCt } from '../txs/ringCt/setupRingCt';
 import { CoinbaseUTXO, PaymentUTXO, SignedPaymentTX } from '../interfaces';
 import { Point, amountToString, generateRing, keccak256, unmaskAmount } from '../utils';
@@ -47,20 +46,40 @@ export async function homeUi() {
 
   const strBalance = stringFromAmount(balance, 18);
 
-  return {
-    ui: panel([
-      text(`Balance: **${strBalance} ETH**`),
-      copyable(await userAddress()),
-      button({ value: '💸 Send', name: 'send' }),
-      divider(),
-      button({ value: '💰 Receive', name: 'receive' }),
-      divider(),
-      button({ value: '🌉 Bridge (Soon ...)', name: 'bridge', variant: 'secondary' }),
-      divider(),
-      button({ value: '📜 View UTXOs', name: 'view-utxos' }),
-      divider(),
-      text("Powered by [Cypher Lab 🔗](https://www.cypherlab.org/)"),
-    ]),
+  switch (await locale()) {
+    case "fr":
+      return {
+        ui: panel([
+          text(`Solde: **${strBalance} ETH**`),
+          copyable(await userAddress()),
+          button({ value: '💸 Envoyer', name: 'send' }),
+          divider(),
+          button({ value: '💰 Recevoir', name: 'receive' }),
+          divider(),
+          button({ value: '🌉 Bridge (Soon ...)', name: 'bridge', variant: 'secondary' }),
+          divider(),
+          button({ value: '📜 Mes UTXOs', name: 'view-utxos' }),
+          divider(),
+          text("Développé par [Cypher Lab 🔗](https://www.cypherlab.org/)"),
+        ]),
+      }
+
+    default:
+      return {
+        ui: panel([
+          text(`Balance: **${strBalance} ETH**`),
+          copyable(await userAddress()),
+          button({ value: '💸 Send', name: 'send' }),
+          divider(),
+          button({ value: '💰 Receive', name: 'receive' }),
+          divider(),
+          button({ value: '🌉 Bridge (Soon ...)', name: 'bridge', variant: 'secondary' }),
+          divider(),
+          button({ value: '📜 View UTXOs', name: 'view-utxos' }),
+          divider(),
+          text("Powered by [Cypher Lab 🔗](https://www.cypherlab.org/)"),
+        ]),
+      }
   }
 }
 
@@ -78,28 +97,55 @@ export async function newTx(id: string) {
   }
 
   const strBalance = stringFromAmount(balance, 18);
-  return await snap.request({
-    method: 'snap_updateInterface',
-    params: {
-      id,
-      ui: panel([
-        heading('Send tokens'),
-        text(`Balance: **${strBalance} ETH**`),
-        form({
-          name: 'valid-tx',
-          children: [
-            input({ name: 'tx-receiver', label: 'Receiver Address' }),
-            input({ name: 'amount', label: 'Amount (ETH)', inputType: "number" }),
-            input({ name: 'fee', label: 'Fee (ETH)', inputType: "number", value: "0.00001" }),
-            button('Send ETH', ButtonType.Submit, 'valid-tx'),
-          ],
-        }),
-        divider(),
-        row(" ", text(" ")),
-        button({ value: 'Home 🏠', name: 'go-home', variant: 'secondary' }),
-      ]),
-    },
-  });
+
+  switch (await locale()) {
+    case 'fr':
+      return await snap.request({
+        method: 'snap_updateInterface',
+        params: {
+          id,
+          ui: panel([
+            heading('Envoyer'),
+            text(`Solde: **${strBalance} ETH**`),
+            form({
+              name: 'valid-tx',
+              children: [
+                input({ name: 'tx-receiver', label: 'Adresse du destinataire' }),
+                input({ name: 'amount', label: 'Montant (ETH)', inputType: "number" }),
+                input({ name: 'fee', label: 'Frais (ETH)', inputType: "number", value: "0.00001" }),
+                button('Envoyer de l\'ETH', ButtonType.Submit, 'valid-tx'),
+              ],
+            }),
+            divider(),
+            row(" ", text(" ")),
+            button({ value: 'Accueil 🏠', name: 'go-home', variant: 'secondary' }),
+          ]),
+        },
+      });
+    default:
+      return await snap.request({
+        method: 'snap_updateInterface',
+        params: {
+          id,
+          ui: panel([
+            heading('Send tokens'),
+            text(`Balance: **${strBalance} ETH**`),
+            form({
+              name: 'valid-tx',
+              children: [
+                input({ name: 'tx-receiver', label: 'Receiver Address' }),
+                input({ name: 'amount', label: 'Amount (ETH)', inputType: "number" }),
+                input({ name: 'fee', label: 'Fee (ETH)', inputType: "number", value: "0.00001" }),
+                button('Send ETH', ButtonType.Submit, 'valid-tx'),
+              ],
+            }),
+            divider(),
+            row(" ", text(" ")),
+            button({ value: 'Home 🏠', name: 'go-home', variant: 'secondary' }),
+          ]),
+        },
+      });
+  }
 }
 
 /**
@@ -161,21 +207,41 @@ export async function sendTxFromExpended(id: string, event: any): Promise<{ ui: 
   }
 
   // console.log("bleu56: ", data[0]!.value, " ", fee, '\n::' + amountToString(data[0]!.value, 18));
-  return {
-    ui: panel([
-      heading('Tokens sent'),
-      text('Transaction broadcasted with id:'),
-      copyable(txId),
-      divider(),
-      text('You sent:'),
-      copyable(amountToString(data[0]!.value, 18) + " ETH"),
-      text('To:'),
-      copyable(data[0]!.address),
-      text('With a fee of:'),
-      copyable(amountToString(fee, 18) + " ETH"),
-      divider(),
-      button({ value: 'Home 🏠', name: 'go-home', variant: 'secondary' }),
-    ]),
+  switch (await locale()) {
+    case 'fr':
+      return {
+        ui: panel([
+          heading('Tokens envoyés'),
+          text('Transaction diffusée avec l\'id:'),
+          copyable(txId),
+          divider(),
+          text('Vous avez envoyé:'),
+          copyable(amountToString(data[0]!.value, 18) + " ETH"),
+          text('À:'),
+          copyable(data[0]!.address),
+          text('Avec des frais de:'),
+          copyable(amountToString(fee, 18) + " ETH"),
+          divider(),
+          button({ value: 'Accueil 🏠', name: 'go-home', variant: 'secondary' }),
+        ]),
+      }
+    default:
+      return {
+        ui: panel([
+          heading('Tokens sent'),
+          text('Transaction broadcasted with id:'),
+          copyable(txId),
+          divider(),
+          text('You sent:'),
+          copyable(amountToString(data[0]!.value, 18) + " ETH"),
+          text('To:'),
+          copyable(data[0]!.address),
+          text('With a fee of:'),
+          copyable(amountToString(fee, 18) + " ETH"),
+          divider(),
+          button({ value: 'Home 🏠', name: 'go-home', variant: 'secondary' }),
+        ]),
+      }
   }
 }
 
@@ -192,18 +258,35 @@ export async function validTx(id: string, event: any): Promise<{ ui: Panel }> {
   const data = { address: event.value['tx-receiver']!, value: event.value['amount']! };
   const fee = event.value['fee']!;
 
-  return {
-    ui: panel([
-      heading('Send tokens'),
-      text('You are about to send :'),
-      copyable(data.value.toString() + " ETH"),
-      text('To:'),
-      copyable(data.address),
-      text('With a fee of:'),
-      copyable(fee.toString() + " ETH"),
-      button({ value: 'Sign 🚀', name: 'submit-tx+' + JSON.stringify({ 'tx-receiver': event.value['tx-receiver']!, amount: amountFromString(event.value['amount']!, 18).toString(), fee: amountFromString(fee, 18).toString() }), variant: 'primary' }),
-      button({ value: 'Cancel', name: 'go-home', variant: 'secondary' }),
-    ]),
+  switch (await locale()) {
+    case 'fr':
+      return {
+        ui: panel([
+          heading('Tokens envoyés'),
+          text('Vous êtes sur le point d\'envoyer :'),
+          copyable(data.value.toString() + " ETH"),
+          text('À:'),
+          copyable(data.address),
+          text('Avec des frais de:'),
+          copyable(fee.toString() + " ETH"),
+          button({ value: 'Signer 🚀', name: 'submit-tx+' + JSON.stringify({ 'tx-receiver': event.value['tx-receiver']!, amount: amountFromString(event.value['amount']!, 18).toString(), fee: amountFromString(fee, 18).toString() }), variant: 'primary' }),
+          button({ value: 'Annuler', name: 'go-home', variant: 'secondary' }),
+        ]),
+      }
+    default:
+      return {
+        ui: panel([
+          heading('Send tokens'),
+          text('You are about to send :'),
+          copyable(data.value.toString() + " ETH"),
+          text('To:'),
+          copyable(data.address),
+          text('With a fee of:'),
+          copyable(fee.toString() + " ETH"),
+          button({ value: 'Sign 🚀', name: 'submit-tx+' + JSON.stringify({ 'tx-receiver': event.value['tx-receiver']!, amount: amountFromString(event.value['amount']!, 18).toString(), fee: amountFromString(fee, 18).toString() }), variant: 'primary' }),
+          button({ value: 'Cancel', name: 'go-home', variant: 'secondary' }),
+        ]),
+      }
   }
 
 }
@@ -228,29 +311,58 @@ export async function displayUtxos() {
   let toDisplay: any = []
   for (let i = 0; i < utxos.length; i++) {
     toDisplay.push(
-      ...utxos[i]!.utxos.map((utxo, index) => {
-        return panel([
-          text(`UTXO ${index + 1}`),
-          text(`Version: ${utxo.version}`),
-          text(`Amount: ${stringFromAmount(BigInt(utxos[i]!.amount), 18)} ETH`),
-          text(`Public Key: ${utxo.public_key}`),
-          text(`Currency: ${utxo.currency}`),
-          text(`Transaction hash: ${utxo.transaction_hash}`),
-          text(`Output index: ${utxo.output_index}`),
-          divider(),
-        ]);
+      ...utxos[i]!.utxos.map(async (utxo, index) => {
+        switch (await locale()) {
+          case 'fr':
+            return panel([
+              text(`UTXO ${index + 1}`),
+              text(`Version: ${utxo.version}`),
+              text(`Montant: ${stringFromAmount(BigInt(utxos[i]!.amount), 18)} ETH`),
+              text(`Clé publique: ${utxo.public_key}`),
+              text(`Devise: ${utxo.currency}`),
+              text(`Hash de transaction: ${utxo.transaction_hash}`),
+              text(`Index de sortie: ${utxo.output_index}`),
+              divider(),
+            ]);
+
+          default:
+            return panel([
+              text(`UTXO ${index + 1}`),
+              text(`Version: ${utxo.version}`),
+              text(`Amount: ${stringFromAmount(BigInt(utxos[i]!.amount), 18)} ETH`),
+              text(`Public Key: ${utxo.public_key}`),
+              text(`Currency: ${utxo.currency}`),
+              text(`Transaction hash: ${utxo.transaction_hash}`),
+              text(`Output index: ${utxo.output_index}`),
+              divider(),
+            ]);
+        }
       })
     );
   }
 
-  return {
-    ui: panel([
-      heading('Your UTXOs'),
-      text(`Balance: **${strBalance} ETH**`),
-      button({ value: 'Home 🏠', name: 'go-home', variant: 'secondary' }),
-      divider(),
-      ...toDisplay,
-      button({ value: 'Home 🏠', name: 'go-home', variant: 'secondary' }),
-    ])
+  switch (await locale()) {
+    case 'fr':
+      return {
+        ui: panel([
+          heading('Vos UTXOs'),
+          text(`Solde: **${strBalance} ETH**`),
+          button({ value: 'Accueil 🏠', name: 'go-home', variant: 'secondary' }),
+          divider(),
+          ...toDisplay,
+          button({ value: 'Accueil 🏠', name: 'go-home', variant: 'secondary' }),
+        ])
+      }
+    default:
+      return {
+        ui: panel([
+          heading('Your UTXOs'),
+          text(`Balance: **${strBalance} ETH**`),
+          button({ value: 'Home 🏠', name: 'go-home', variant: 'secondary' }),
+          divider(),
+          ...toDisplay,
+          button({ value: 'Home 🏠', name: 'go-home', variant: 'secondary' }),
+        ])
+      }
   }
 }

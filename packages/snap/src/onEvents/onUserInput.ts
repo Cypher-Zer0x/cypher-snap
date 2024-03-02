@@ -1,6 +1,6 @@
 import { OnUserInputHandler, UserInputEventType, panel, text, button, heading, copyable, image, spinner } from "@metamask/snaps-sdk";
 import { displayUtxos, homeUi, newTx, sendTxFromExpended, validTx } from "./ui";
-import { isAddressValid, userAddress } from "../keys";
+import { isAddressValid, locale, userAddress } from "../keys";
 import { amountFromString } from "../utils/convert-types/stringToAmount";
 import QRCode from "qrcode-svg";
 
@@ -48,20 +48,36 @@ export const onUserInput: OnUserInputHandler = async ({ id, event }) => {
           ecl: "M", // Error Correction Level: L, M, Q, H
         });
 
-
         // Generate SVG QR code
         const svg = qr.svg();
-        await snap.request({
-          method: 'snap_updateInterface',
-          params: {
-            id,
-            ui: panel([
+
+        let ui: any;
+        switch (await locale()) {
+          case 'fr':
+            ui = panel([
+              heading('Recevoir'),
+              text('Votre adresse:'),
+              copyable(await userAddress()),
+              button({ value: 'Accueil 🏠', name: 'go-home', variant: 'secondary' }),
+              image(svg),
+            ]);
+            break;
+
+          default:
+            ui = panel([
               heading('Receive tokens'),
               text('Your address:'),
               copyable(await userAddress()),
               button({ value: 'Home 🏠', name: 'go-home', variant: 'secondary' }),
               image(svg),
-            ]),
+            ]);
+        }
+
+        await snap.request({
+          method: 'snap_updateInterface',
+          params: {
+            id,
+            ui: ui
           },
         });
         break;

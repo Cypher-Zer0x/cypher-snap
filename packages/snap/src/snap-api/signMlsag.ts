@@ -2,7 +2,7 @@ import { keccak256 } from '../utils';
 import { panel, text, heading, divider, copyable } from '@metamask/snaps-ui';
 import { Mlsag } from '../interfaces';
 import { amountToString, Point, Curve, CurveName } from '../utils';
-import { G } from '../keys';
+import { G, locale } from '../keys';
 
 /**
  * Sign a message using the MLSAG ring signature scheme 
@@ -17,11 +17,23 @@ import { G } from '../keys';
 export async function signMlsag(message: string, privKeys: bigint[], ring: Point[][], alreadyApproved = false): Promise<string> {
 
   if (!alreadyApproved) {
-    const confirmation = await snap.request({
-      method: 'snap_dialog',
-      params: {
-        type: 'confirmation',
-        content: panel([
+    let panel: any;
+    switch (await locale()) {
+      case 'fr':
+        panel = panel([
+          heading('Requête MLSAG'),
+          text('Vous êtes sur le point de signer un message avec MLSAG. Veuillez vérifier les détails et confirmer.'),
+          divider(),
+          text('Vous signez: '),
+          copyable(message),
+          text(`Vous possédez ${privKeys.length} des ${ring.flat(2).length + privKeys.length} clés dans l'anneau.`),
+          text('Anneau:'),
+          copyable(ring.map((elem: Point[]) => elem.map((point: Point) => point.compress()).join(',\n\t')).join(',\n\t')),
+        ]);
+        break;
+
+      default:
+        panel = panel([
           heading('MLSAG Request'),
           text('You are about to sign a message with MLSAG. Please review the details and confirm.'),
           divider(),
@@ -30,7 +42,14 @@ export async function signMlsag(message: string, privKeys: bigint[], ring: Point
           text(`You own ${privKeys.length} of the ${ring.flat(2).length + privKeys.length} keys in the ring.`),
           text('Ring:'),
           copyable(ring.map((elem: Point[]) => elem.map((point: Point) => point.compress()).join(',\n\t')).join(',\n\t')),
-        ])
+        ]);
+    }
+
+    const confirmation = await snap.request({
+      method: 'snap_dialog',
+      params: {
+        type: 'confirmation',
+        content: panel
       },
     });
 
@@ -91,27 +110,54 @@ export async function signRingCtTX(
       ([recipient, { currency, value, decimals }]) => copyable(`${recipient} -> ${amountToString(value, decimals)} ${currency}`)
     );
   if (!alreadyApproved) {
-    let confirmation = await snap.request({
-      method: 'snap_dialog',
-      params: {
-        type: 'confirmation',
-        content: panel([
-          heading('MLSAG Request'),
-          text('You are about to sign a message with MLSAG. Please review the details and confirm.'),
-          divider(),
-          text('**Transaction details:**'),
-          text('Recipients:'),
-          ...recipientList,
-          text('Fee:'),
-          copyable(`${amountToString(txContent.fee, 18)} ETH`),
-          text(`**!!! Please note that these are one-time addresses and any future funds sent to this addresses won't be accessible !!!**`), // todo: check if these addresses have already been used
-          divider(),
-          text(`You own ${keys.utxoPrivKeys.length + 1} of the ${ring.flat(2).length + keys.utxoPrivKeys.length + 1} keys in the ring.`),
-          text('Ring:'),
-          copyable(ring.map((elem: Point[]) => elem.map((point: Point) => point.compress()).join(',\n\t')).join(',\n\t')),
-        ])
-      },
-    });
+    let confirmation: any;
+    switch (await locale()) {
+      case 'fr':
+        confirmation = await snap.request({
+          method: 'snap_dialog',
+          params: {
+            type: 'confirmation',
+            content: panel([
+              heading('Requête MLSAG'),
+              text('Vous êtes sur le point de signer un message avec MLSAG. Veuillez vérifier les détails et confirmer.'),
+              divider(),
+              text('**Détails de la transaction:**'),
+              text('Destinataires:'),
+              ...recipientList,
+              text('Frais:'),
+              copyable(`${amountToString(txContent.fee, 18)} ETH`),
+              text(`**!!! Veuillez noter que ce sont des adresses à usage unique et que tous futurs fonds envoyés à ces adresses seront définitivement perdus !!!**`), // todo: check if these addresses have already been used
+              divider(),
+              text(`Vous possédez ${keys.utxoPrivKeys.length + 1} des ${ring.flat(2).length + keys.utxoPrivKeys.length + 1} clés dans l'anneau.`),
+              text('Anneau:'),
+              copyable(ring.map((elem: Point[]) => elem.map((point: Point) => point.compress()).join(',\n\t')).join(',\n\t')),
+            ])
+          },
+        });
+        break;
+      default:
+        confirmation = await snap.request({
+          method: 'snap_dialog',
+          params: {
+            type: 'confirmation',
+            content: panel([
+              heading('MLSAG Request'),
+              text('You are about to sign a message with MLSAG. Please review the details and confirm.'),
+              divider(),
+              text('**Transaction details:**'),
+              text('Recipients:'),
+              ...recipientList,
+              text('Fee:'),
+              copyable(`${amountToString(txContent.fee, 18)} ETH`),
+              text(`**!!! Please note that these are one-time addresses and any future funds sent to this addresses won't be accessible !!!**`), // todo: check if these addresses have already been used
+              divider(),
+              text(`You own ${keys.utxoPrivKeys.length + 1} of the ${ring.flat(2).length + keys.utxoPrivKeys.length + 1} keys in the ring.`),
+              text('Ring:'),
+              copyable(ring.map((elem: Point[]) => elem.map((point: Point) => point.compress()).join(',\n\t')).join(',\n\t')),
+            ])
+          },
+        });
+    }
 
     if ((confirmation as boolean) !== true) {
       throw new Error('User cancelled the MLSAG signature request');
