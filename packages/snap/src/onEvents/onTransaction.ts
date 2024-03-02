@@ -11,26 +11,13 @@ Plasma XDC: 0xBFA33B098a0904e362eFf7850C63d30cbd2Ff797
 Plasma aurora : 0xBFA33B098a0904e362eFf7850C63d30cbd2Ff797
 Plasma sepolia : 0xF43a5fCa550a8b04252ADd7520caEd8dde85e449
 Plasma oasis : 0xBFA33B098a0904e362eFf7850C63d30cbd2Ff797
-
-48899 : , // Zircuit Testnet
-2525 : , // Injective Testnet
-9090 : , // Inco Gentry Testnet
-80001 : Mumbai_QR_Code, // Mumbai Testnet
-11155111 : , // Sepolia
-59140 : , // Linea Testnet
-1313161555 : , // Aurora Testnet
-51 : , // XDC Testnet
-23295 : , // Oasis Testnet
-296 : , // Hedera Testnet
-1287 : , // Moonbase Alpha
-
 */
+
 export const onTransaction: OnTransactionHandler = async ({
   transaction,
   chainId,
   transactionOrigin,
 }) => {
-  console.log('Transaction received:', transaction, chainId, transactionOrigin)
 
   let insights: any[] = [];
   switch (await locale()) {

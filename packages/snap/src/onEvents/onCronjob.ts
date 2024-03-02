@@ -8,9 +8,8 @@ import { api } from '../keys';
 export const onCronjob: OnCronjobHandler = async ({ request }) => {
   switch (request.method) {
     case 'retrieveUtxos':
-      // console.log('Retrieving new UTXOs...')
       const utxos = await getUtxos(api);
-      // console.log("FETCHING UTXOS", utxos);
+
       // save the balance to the local storage
       await saveUtxos(utxos as (PaymentUTXO | CoinbaseUTXO)[]);
 

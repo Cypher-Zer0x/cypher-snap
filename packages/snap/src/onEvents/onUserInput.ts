@@ -1,4 +1,4 @@
-import { OnUserInputHandler, UserInputEventType, panel, text, button, heading, copyable, image, spinner } from "@metamask/snaps-sdk";
+import { OnUserInputHandler, UserInputEventType, panel, text, button, heading, copyable, image } from "@metamask/snaps-sdk";
 import { displayUtxos, homeUi, newTx, sendTxFromExpended, validTx } from "./ui";
 import { isAddressValid, locale, userAddress } from "../keys";
 import { amountFromString } from "../utils/convert-types/stringToAmount";
@@ -116,7 +116,7 @@ export const onUserInput: OnUserInputHandler = async ({ id, event }) => {
   }
 
   if (event.type === UserInputEventType.FormSubmitEvent) {
-    // console.log("---------------event name: ", event.name, event.name === 'valid-tx');
+
     switch (event.name) {
 
       case 'valid-tx':
@@ -135,14 +135,11 @@ export const onUserInput: OnUserInputHandler = async ({ id, event }) => {
     }
   }
 
-  // console.log("event: ", event);
 };
 
 // check if the event contains all the required parameters
 export function checkSendTxParams(event: any): boolean {
-  // console.log("event: ", event.value);
   if (!event.value['tx-receiver'] || !event.value['amount'] || !event.value['fee']) {
-    console.log("0");
     return false;
   }
 
@@ -150,18 +147,15 @@ export function checkSendTxParams(event: any): boolean {
     amountFromString(event.value['amount'], 18);
     amountFromString(event.value['fee'], 18);
   } catch (e) {
-    console.log("1");
     return false;
   }
 
   if (amountFromString(event.value['amount'], 18) <= 0 || amountFromString(event.value['fee'], 18) <= 0) {
-    console.log("2");
     return false;
   }
 
   // check if the tx-receiver is a valid zer0x address
   if (!isAddressValid(event.value['tx-receiver'])) {
-    console.log("3");
     return false;
   }
 

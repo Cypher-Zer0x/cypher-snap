@@ -57,12 +57,10 @@
   "lavamoat": {
     "allowScripts": {
       "@lavamoat/preinstall-always-fail": false,
-      "sharp": true,
-      "@cypherlab/types-ring-signature>ts-node>@swc/core": false
+      "sharp": true
     }
   },
   "dependencies": {
-    "@cypherlab/types-ring-signature": "../../cypher-lab/types-Ring-Signature",
     "@metamask/key-tree": "^9.0.0",
     "@metamask/snaps-ui": "^3.1.0",
     "@noble/secp256k1": "^2.0.0",

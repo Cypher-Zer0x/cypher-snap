@@ -1,5 +1,5 @@
 import { keccak256 } from "../utils";
-import { SignedPaymentTX, TxToRpc, UTXO } from "../interfaces";
+import { SignedPaymentTX, UTXO } from "../interfaces";
 
 /**
  * Broadcast a transaction to the network
@@ -46,7 +46,7 @@ export async function broadcastTx(api: string, signedTx: SignedPaymentTX, output
     }
   }).then(res => res.json());
 
-  console.log("txId: ", txToBroadcast.hash, txId);
+  console.log("txId: ", txToBroadcast.hash);
   return txToBroadcast.hash;
   // return (await fetch('https://beaconcha.in/api/v1/execution/gasnow')).text(); 
 }

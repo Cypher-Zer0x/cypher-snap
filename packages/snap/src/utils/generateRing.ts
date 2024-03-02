@@ -38,6 +38,5 @@ export async function generateRing(outputsNumber: bigint): Promise<Point[][]> { 
     ring.push(ringElement);
   }
 
-  // console.log("RING size: ", ring.length, ring[0]!.length);
   return ring;
 }

@@ -9,14 +9,13 @@ import { UTXO } from "../interfaces";
 export async function getUtxos(api: string): Promise<UTXO[]> {
 
   const utxoSet = await fetch(`${api}/utxo/set`).then((res) => res.json());
-  console.log("API: ", `${api}/utxo/set`);
 
   let utxos: UTXO[] = [];
   // list the keys
   for (let key in utxoSet) {
     utxos = utxos.concat(utxoSet[key]);
   }
-  // console.log(JSON.stringify(utxos, null, 2));
+
   return utxos.map((utxo: any) => {
     if (utxo.Payment) {
       return utxo.Payment;

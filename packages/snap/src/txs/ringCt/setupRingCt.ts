@@ -2,7 +2,7 @@ import { Curve, CurveName, Point, keccak256, maskAmount } from "../../utils";
 import { CoinbaseUTXO, LightRangeProof, PaymentUTXO, UnsignedPaymentTX } from "../../interfaces";
 import { getLocalUtxos } from "../../utils/utxoDB";
 import { randomBigint } from "../../snap-api/signMlsag";
-import { userSpendPub, userViewPub, G, H, pubKeysFromAddress } from "../../keys";
+import { userViewPub, G, H, pubKeysFromAddress } from "../../keys";
 
 
 /**
@@ -49,7 +49,7 @@ export async function setupRingCt(
 
   // get all the utxos from the metamask storage
   const utxos = await getLocalUtxos();
-  console.log("utxos: ", JSON.stringify(utxos));
+
   // select the utxos to spend (such as sum of utxos > amount + fee)
   const amounts = Object.keys(utxos);
   const selectedUtxos: (PaymentUTXO | CoinbaseUTXO)[] = [];
@@ -86,7 +86,6 @@ export async function setupRingCt(
 
     blindingFactors.push(bf);
     totalSent += output.value;
-    console.log("recipientViewPub: \n", recipientViewPub.compress());
 
     return {
       version: "0x00",
@@ -113,11 +112,9 @@ export async function setupRingCt(
     } satisfies PaymentUTXO;
 
   }));
-  console.log("total sent:", sum, "needed: ", totalAmount + fee, "expected change: ", sum - totalAmount - fee);
   // if total sent > totalAmount + fee, create a new utxo for the change
   if (sum > totalAmount + fee) {
     const r = randomBigint((new Curve(CurveName.SECP256K1)).N);
-    // console.log("totalSent > totalAmount + fee: ", sum > totalAmount + fee);
     const change = sum - totalAmount - fee;
     if (change < 0) throw new Error("change < 0");
     const bf = BigInt(keccak256("commitment mask" + keccak256(viewPub.mult(r).compress())));
@@ -148,14 +145,13 @@ export async function setupRingCt(
 
     blindingFactors.push(bf);
   }
-  console.log("avant tx");
+
   // generate the tx
   const tx: UnsignedPaymentTX = {
     inputs: selectedUtxos.map(utxo => (utxo as any).hash),
     outputs: outputUtxos.map(utxo => (keccak256(JSON.stringify(utxo)))),
     fee: '0x' + fee.toString(16),
   } satisfies UnsignedPaymentTX;
-  console.log("avant tx2");
   // todo: mix outputs order to avoid always having the change output at the end of the tx
 
   // return the tx
