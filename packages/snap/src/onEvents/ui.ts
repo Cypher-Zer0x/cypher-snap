@@ -302,7 +302,7 @@ export async function displayUtxos() {
   utxos = utxos.sort((a, b) => BigInt(a.amount) < BigInt(b.amount) ? -1 : 1);
 
   const strBalance = stringFromAmount(balance, 18);
-  console.log("0");
+
   // display utxos
   let toDisplay: any[] = []
   for (let i = 0; i < utxos.length; i++) {
@@ -337,8 +337,7 @@ export async function displayUtxos() {
         }))
     );
   }
-  console.log("1");
-  console.log(toDisplay);
+
   switch (await locale()) {
     case 'fr':
       return {
