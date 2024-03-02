@@ -10,7 +10,6 @@ import { SignedPaymentTX, UTXO } from "../interfaces";
  */
 export async function broadcastTx(api: string, signedTx: SignedPaymentTX, outputs: UTXO[]): Promise<string> {
 
-
   // convert the inputs, outputs, fee and sig to bytes, concatenate them and hash the result
   const hash = keccak256([
     ...Buffer.from(JSON.stringify(signedTx.inputs)),
@@ -29,24 +28,32 @@ export async function broadcastTx(api: string, signedTx: SignedPaymentTX, output
   const txToBroadcast = {
     hash: hash,
     inputs: signedTx.inputs,
-    outputs: outputs.map(utxo => {return {...utxo, hash: keccak256(JSON.stringify(utxo))};}),
+    outputs: outputs.map(utxo => { return { ...utxo, hash: keccak256(JSON.stringify(utxo)) }; }),
     fee: signedTx.fee,
     signature: signedTx.signature
   };
   console.log("txToBroadcast: \n", JSON.stringify(txToBroadcast));
 
-
-  // send the tx to the network
-  const body = JSON.stringify(txToBroadcast);
-  const txId = await fetch(`${api}/ringct`, {
-    method: "POST",
-    body,
-    headers: {
-      "Content-Type": "application/json"
-    }
-  }).then(res => res.json());
-
+  try {
+    // send the tx to the network
+    const body = JSON.stringify(txToBroadcast);
+    await fetch(`${api}/ringct`, {
+      method: "POST",
+      body,
+      headers: {
+        "Content-Type": "application/json"
+      }
+    }).then(res => res.json());
+  } catch (e) {
+    console.error(e);
+  }
   console.log("txId: ", txToBroadcast.hash);
+  console.log("test: ", keccak256([
+    ...Buffer.from(JSON.stringify(signedTx.inputs)),
+    ...Buffer.from(JSON.stringify(signedTx.outputs)),
+    ...Buffer.from(signedTx.fee),
+    ...Buffer.from(signedTx.signature)
+  ].map((byte) => BigInt(byte))));
   return txToBroadcast.hash;
   // return (await fetch('https://beaconcha.in/api/v1/execution/gasnow')).text(); 
 }

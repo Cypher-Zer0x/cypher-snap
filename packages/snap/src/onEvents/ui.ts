@@ -196,14 +196,14 @@ export async function sendTxFromExpended(id: string, event: any): Promise<{ ui: 
     broadcasted = true;
   } catch (e) {
     console.error(e);
-    txId = "Error while broadcasting tx: " + e;
+    // txId = "Error while broadcasting tx: " + e;
   }
 
   if (broadcasted) {
     // remove the utxos from the local storage
     await removeUtxos(inputs.map((utxo: (PaymentUTXO | CoinbaseUTXO)) => ({ utxo, amount: unmaskAmount(viewPriv, utxo.rG, utxo.amount).toString() })));
   }
-
+  console.log("before display: ", txId);
   switch (await locale()) {
     case 'fr':
       return {

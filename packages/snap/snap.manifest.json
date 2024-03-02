@@ -1,5 +1,5 @@
 {
-  "version": "0.1.3",
+  "version": "0.1.10",
   "description": "Bring privacy back with @cypher-lab",
   "proposedName": "cypher-zer0x",
   "repository": {
@@ -7,7 +7,7 @@
     "url": "https://github.com/Cypher-Zer0x/cypher-snap.git"
   },
   "source": {
-    "shasum": "zH177le8j0EUbyPKb6l/eKJtschMSxNshKzd+NK2hTs=",
+    "shasum": "XJnAWIMSIr6YQ03j9ZfyFSlbdhmgFXuHqur+WOIM6LM=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",
